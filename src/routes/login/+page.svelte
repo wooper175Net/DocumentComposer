@@ -37,15 +37,15 @@ function handleKeyDown(e:any) {
       <div>
       <div class="form-control w-full">
           <label class="label px-0">
-            <span>Username</span>
+            <span class:text-red-600={formErrors.username}>Username</span>
           </label>
           <input type="text" bind:value={username} class="field" class:has-error={formErrors.username} required />
       </div>
       <div class="form-control w-full">
         <label class="label px-0">
-          <span>Password</span>
+          <span class:text-red-600={formErrors.username}>Password</span>
         </label>
-        <input type="password" class="field" required />
+        <input type="password" class:has-error={formErrors.username} class="field" required />
       </div>
       <div class="flex justify-center mt-16">
         <button class="btn btn-sm btn-outline w-40 normal-case" on:click={login}>Login</button>

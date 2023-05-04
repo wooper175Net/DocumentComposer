@@ -10,6 +10,7 @@ import PopupWrapper from "$lib/components/shared/PopupWrapper.svelte";
 import IconFolderDel from "$lib/components/icons/icon-folder-del.svelte";
 import IconCircleDblCheck from "$lib/components/icons/icon-circle-dbl-check.svelte";
 import IconCirleDel from "$lib/components/icons/icon-cirle-del.svelte";
+import FaPen from 'svelte-icons/fa/FaPen.svelte'
 import { createEventDispatcher } from 'svelte';
 
 const dispatch = createEventDispatcher();
@@ -32,6 +33,11 @@ let tempDocSubItem;
 let whatToDelete: Function;
 
 let newSubItemTitle: string;
+
+let showEditHead:number|null;
+let showEditDesc:number|null;
+let editItemHead:number|null;
+let editItemDesc:number|null;
 
 function handleSort(e) {
     items = e.detail.items;
@@ -142,7 +148,26 @@ $: items.sort((a,b) => {
     if (!a.done && b.done)
         return -1;
 });
+
+
+function handleEscape(e) {
+    if (e.key === 'Escape') {
+        editItemDesc = null;
+        editItemHead = null;
+    }
+}
+
+function handleEnterKey(e, item) {
+    if (e.key !== 'Enter') {
+        return;
+    }
+    dispatch('finalize', items);
+    editItemDesc = null;
+    editItemHead = null;
+}
+
 </script>
+<svelte:window on:keydown={handleEscape} />
 <section use:dndzone={{
     items, flipDurationMs, type, dropTargetStyle, dropTargetClasses, morphDisabled
 }} on:consider={handleSort} on:finalize={handleFinalize}>
@@ -151,12 +176,42 @@ $: items.sort((a,b) => {
     <div class="card w-full bg-base-100 shadow-lg mb-4 rounded-lg" class:done={item.done} animate:flip={{duration:flipDurationMs}}>
         <div class="card-body p-4 pl-6">
             <div class="card-title font-medium text-xl flex items-baseline">
-                <span>{item.heading}</span>
+                <span class="cursor-pointer w-full"
+                    on:mouseenter={() => showEditHead = item.id}  
+                    on:mouseleave={() => showEditHead = null}
+                    on:click={() => {editItemHead = item.id;}}
+                    on:keyup={(e) => handleEnterKey(e, item)}
+                >
+                    {#if editItemHead === item.id}
+                        <input type="text" bind:value="{item.heading}" class="input input-md input-bordered w-[90%] rounded-md" />
+                    {:else}
+                        <span>{item.heading}</span>
+                    {/if}
+                    {#if showEditHead === item.id && editItemHead !== item.id}
+                        <span class="inline-block h-4 text-[#CCD2E3] pl-2"><FaPen /></span>
+                    {/if}
+                </span>    
                 <div class="head-icon ml-auto" class:red-icon={item.type === 'reservation'} class:green-icon={item.type === 'question'}>
                     <span>{item.type === 'reservation' ? '!' : '?'}</span>
                 </div>
             </div>
-            <p class="text-[#787878] text-lg">{item.desc ?? ''}</p>
+            <div
+                on:mouseenter={() => showEditDesc = item.id}  
+                on:mouseleave={() => showEditDesc = null}
+                on:click={() => editItemDesc = item.id}
+                on:keyup={(e) => handleEnterKey(e, item)}
+            >
+            {#if editItemDesc === item.id}
+                <textarea bind:value={item.desc} class="textarea textarea-bordered w-full h-[5rem] rounded-md"></textarea>
+            {:else}
+                <p class="text-[#787878] text-lg cursor-pointer">
+                    {item.desc ?? ''}
+                {#if showEditDesc === item.id && editItemDesc !== item.id}
+                <span class="inline-block h-4 text-[#CCD2E3] pl-2"><FaPen /></span>
+                {/if}
+                </p>
+            {/if}
+            </div>
             {#if item[SHADOW_ITEM_MARKER_PROPERTY_NAME]}
 				<div in:fade={{duration:200, easing: cubicIn}} class='card-body custom-shadow-item'>
                     <h2 class="card-title font-medium">{item.heading}</h2>
