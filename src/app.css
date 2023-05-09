@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { 
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    background-color: #F5F5F5;
+}
+
+.btn {
+    @apply rounded-sm;
+}
+
+.custom-shadow-item {
+    opacity: 0.5;
+    @apply absolute inset-0 m-0 visible rounded-md bg-slate-200;
+}
+.head-icon {
+    @apply w-10 h-10 rounded-md flex items-center;
+}
+.red-icon {
+    @apply bg-[#feeaea] border border-[#ff7575];
+}
+.head-icon span {
+    @apply inline-block w-10 font-extrabold text-[36px] text-center;
+}
+.red-icon span {
+    @apply text-[#ff7575];
+}
+.green-icon {
+    @apply bg-[#E8FFE9] border border-[#59FF60];
+}
+.green-icon span {
+    @apply text-[#59FF60];
+}
+
+/* Forms */
+.form-control {
+    @apply mb-3 font-light;
+}
+
+.form-control input.field, .form-control textarea.field {
+    @apply input input-bordered rounded-md h-10 px-2 text-lg;
+} 
+
+input.field.has-error, textarea.field.has-error {
+    @apply input input-bordered rounded-md h-10 px-2 text-lg input-error;
+}
+
+.form-control select {
+    @apply select select-sm select-bordered w-full max-w-xs rounded-md h-10 text-lg font-light;
+}
+
+.form-control label span {
+    @apply text-xl font-light;
+}
