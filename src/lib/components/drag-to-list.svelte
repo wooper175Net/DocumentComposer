@@ -12,7 +12,6 @@ import IconCircleDblCheck from "$lib/components/icons/icon-circle-dbl-check.svel
 import IconCirleDel from "$lib/components/icons/icon-cirle-del.svelte";
 import FaPen from 'svelte-icons/fa/FaPen.svelte'
 import { createEventDispatcher } from 'svelte';
-    import type { caseItem } from "$lib/interfaces/caseItem";
 
 const dispatch = createEventDispatcher();
 
