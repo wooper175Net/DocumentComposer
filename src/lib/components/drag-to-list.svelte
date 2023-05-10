@@ -12,6 +12,7 @@ import IconCircleDblCheck from "$lib/components/icons/icon-circle-dbl-check.svel
 import IconCirleDel from "$lib/components/icons/icon-cirle-del.svelte";
 import FaPen from 'svelte-icons/fa/FaPen.svelte'
 import { createEventDispatcher } from 'svelte';
+    import type { caseItem } from "$lib/interfaces/caseItem";
 
 const dispatch = createEventDispatcher();
 
@@ -158,7 +159,7 @@ function handleEscape(e) {
 }
 
 function handleEnterKey(e, item) {
-    if (e.key !== 'Enter') {
+    if (e.key !== 'Enter' || (!editItemDesc && !editItemHead)) {
         return;
     }
     dispatch('finalize', items);
@@ -166,6 +167,19 @@ function handleEnterKey(e, item) {
     editItemHead = null;
 }
 
+function inlineEditHeadClick(item: docItem) {
+    if(editItemHead || item.done) {
+        return;
+    }
+    editItemHead = item.id;
+}
+
+function inlineEditDescClick(item: docItem) {
+    if(editItemDesc || item.done) {
+        return;
+    }
+    editItemDesc = item.id;
+}
 </script>
 <svelte:window on:keydown={handleEscape} />
 <section use:dndzone={{
@@ -176,10 +190,10 @@ function handleEnterKey(e, item) {
     <div class="card w-full bg-base-100 shadow-lg mb-4 rounded-lg" class:done={item.done} animate:flip={{duration:flipDurationMs}}>
         <div class="card-body p-4 pl-6">
             <div class="card-title font-medium text-xl flex items-baseline">
-                <span class="cursor-pointer w-full"
-                    on:mouseenter={() => showEditHead = item.id}  
+                <span class="w-full" class:cursor-pointer={!item.done}
+                    on:mouseenter={() => showEditHead = item.id}
                     on:mouseleave={() => showEditHead = null}
-                    on:click={() => {editItemHead = item.id;}}
+                    on:click={() => inlineEditHeadClick(item)}
                     on:keyup={(e) => handleEnterKey(e, item)}
                 >
                     {#if editItemHead === item.id}
@@ -195,16 +209,16 @@ function handleEnterKey(e, item) {
                     <span>{item.type === 'reservation' ? '!' : '?'}</span>
                 </div>
             </div>
-            <div
+            <div class:cursor-pointer={!item.done}
                 on:mouseenter={() => showEditDesc = item.id}  
                 on:mouseleave={() => showEditDesc = null}
-                on:click={() => editItemDesc = item.id}
+                on:click={() => inlineEditDescClick(item)}
                 on:keyup={(e) => handleEnterKey(e, item)}
             >
             {#if editItemDesc === item.id}
                 <textarea bind:value={item.desc} class="textarea textarea-bordered w-full h-[5rem] rounded-md"></textarea>
             {:else}
-                <p class="text-[#787878] text-lg cursor-pointer">
+                <p class="text-[#787878] text-lg">
                     {item.desc ?? ''}
                 {#if showEditDesc === item.id && editItemDesc !== item.id}
                 <span class="inline-block h-4 text-[#CCD2E3] pl-2"><FaPen /></span>

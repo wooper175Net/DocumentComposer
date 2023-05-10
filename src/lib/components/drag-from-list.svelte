@@ -2,7 +2,7 @@
 // @ts-nocheck
 import type { docItem } from "$lib/interfaces/docItem";
 import type { docItemSubItem } from "$lib/interfaces/docItemSubItem";
-import {dndzone} from 'svelte-dnd-action';
+import {dndzone, TRIGGERS, SHADOW_ITEM_MARKER_PROPERTY_NAME} from 'svelte-dnd-action';
 import {flip} from 'svelte/animate';
 import PopupWrapper from "$lib/components/shared/PopupWrapper.svelte";
 import IconCirleDel from "$lib/components/icons/icon-cirle-del.svelte";
@@ -31,12 +31,33 @@ let formErrors = {
     hasErrors: false
 };
 
-function handleSort(e) {
-    items = e.detail.items;
+let shouldIgnoreDndEvents = false;
+function handleOnConsider(e) {
+    const {trigger, id} = e.detail.info;
+    if (trigger === TRIGGERS.DRAG_STARTED) {
+        const idx = items.findIndex(item => item.id === id);
+        const newId = `${id}_copy_${Math.round(Math.random()*10000)}`;
+        e.detail.items = e.detail.items.filter(item => !item[SHADOW_ITEM_MARKER_PROPERTY_NAME]);
+        e.detail.items.splice(idx, 0, {...items[idx], id: newId});
+        items = e.detail.items;
+        shouldIgnoreDndEvents = true;
+    }
+    else if (!shouldIgnoreDndEvents) {
+        items = e.detail.items;
+    }
+    else {
+        items = [...items];
+    }
 }
 
 function handleFinalize(e) {
-    items = e.detail.items;
+    if (!shouldIgnoreDndEvents) {
+        items = e.detail.items;
+    }
+    else {
+        items = [...items];
+        shouldIgnoreDndEvents = false;
+    }
     dispatch('finalize-templates', items);
 }
 
@@ -109,7 +130,7 @@ function handlePopupClose() {
     
 <ul id="draggable-items-list" class="mt-7 w-full" use:dndzone={{
     items, flipDurationMs, type, dropFromOthersDisabled, dropTargetStyle, dropTargetClasses
-}} on:consider={handleSort} on:finalize={handleFinalize}>
+}} on:consider={handleOnConsider} on:finalize={handleFinalize}>
     {#each items as item(item.id)}
         <li animate:flip={{duration:flipDurationMs}}>
             {item.heading}	
