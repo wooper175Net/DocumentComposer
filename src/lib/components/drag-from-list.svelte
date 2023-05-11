@@ -7,6 +7,10 @@ import {flip} from 'svelte/animate';
 import PopupWrapper from "$lib/components/shared/PopupWrapper.svelte";
 import IconCirleDel from "$lib/components/icons/icon-cirle-del.svelte";
 import { createEventDispatcher } from 'svelte';
+import CustomMenu from "$lib/components/context-menu/CustomMenu.svelte";
+import MenuOption from '$lib/components/context-menu/MenuOption.svelte';
+import FaPen from 'svelte-icons/fa/FaPen.svelte'
+import FaTrashAlt from 'svelte-icons/fa/FaTrashAlt.svelte'
 
 const dispatch = createEventDispatcher();
 
@@ -16,8 +20,11 @@ export let type: string = 'draggable';
 const dropFromOthersDisabled = true;
 const dropTargetStyle = {outline: 'none'};
 const dropTargetClasses = [ 'drop-shadow-xl' ];
-let addNewItem = false;
 
+let addNewItem = false;
+let editItem = false; //set this true when editing item
+
+let toEditId: string = '';
 let newHeading: string = '';
 let newDesc: string = '';
 let newType: string = 'reservation';
@@ -31,16 +38,19 @@ let formErrors = {
     hasErrors: false
 };
 
-let shouldIgnoreDndEvents = false;
+let shouldIgnoreDndEvents:boolean = false;
+let confirmDelModal:boolean = false;
+let toDeleteId:string;
+
 function handleOnConsider(e) {
     const {trigger, id} = e.detail.info;
     if (trigger === TRIGGERS.DRAG_STARTED) {
         const idx = items.findIndex(item => item.id === id);
-        const newId = `${id}_copy_${Math.round(Math.random()*10000)}`;
+        const newId = Math.round(Math.random()*10000);//`${id}_copy_${Math.round(Math.random()*10000)}`; 
         e.detail.items = e.detail.items.filter(item => !item[SHADOW_ITEM_MARKER_PROPERTY_NAME]);
         e.detail.items.splice(idx, 0, {...items[idx], id: newId});
         items = e.detail.items;
-        shouldIgnoreDndEvents = true;
+        shouldIgnoreDndEvents = true;   
     }
     else if (!shouldIgnoreDndEvents) {
         items = e.detail.items;
@@ -58,7 +68,7 @@ function handleFinalize(e) {
         items = [...items];
         shouldIgnoreDndEvents = false;
     }
-    dispatch('finalize-templates', items);
+    // dispatch('finalize-templates', items); //not needed for rearranging
 }
 
 function validateNewTemplate() {
@@ -81,16 +91,28 @@ function saveNewTemplate() {
     }
     newSubItems = newSubItems.filter((si) => si.label !== '');
 
-    const newTempItem: docItem = {
-        id: Math.floor(Math.random() * 10000),
-        heading: newHeading,
-        desc: newDesc,
-        type: newType,
-        sub_items: newSubItems
-    };
-    items = [...items, newTempItem];
-    // console.log(items);
-    addNewItem = false;
+    if (editItem) {
+        const toEdit: docItem = items.find(e => e.id === toEditId);
+
+        toEdit.heading = newHeading;
+        toEdit.desc = newDesc;
+        toEdit.type = newType;
+        toEdit.sub_items = newSubItems;
+        editItem = false;
+        items = [...items];
+    } else {
+
+        const newTempItem: docItem = {
+            id: Math.floor(Math.random() * 10000),
+            heading: newHeading,
+            desc: newDesc,
+            type: newType,
+            sub_items: newSubItems
+        };
+        items = [...items, newTempItem];
+        addNewItem = false;
+    }
+    
     dispatch('finalize-templates', items);
     resetNewItemForm();
     resetFormErrors();
@@ -103,12 +125,18 @@ function resetFormErrors() {
 }
 
 function resetNewItemForm() {
+    toEditId = null;
     newHeading = '';
     newDesc = '';
     newType = 'reservation';
     newSubItems = [
         {id: Math.floor(Math.random() * 10000), label: ""}
     ];
+}
+
+function handleNewItem() {
+    resetNewItemForm();
+    addNewItem = true;
 }
 
 function handleNewSubItem() {
@@ -121,10 +149,37 @@ function handleRemoveSubItem(index: number) {
 
 function handlePopupClose() {
     addNewItem = false;
+    editItem = false;
     resetNewItemForm();
     resetFormErrors();
 }
 
+function handleEditItem(item: docItem) {
+    resetNewItemForm();
+    toEditId = item.id;
+    newHeading = item.heading;
+    newDesc = item.desc;
+    newType = item.type;
+    if (item.sub_items && item.sub_items.length > 0) {
+        newSubItems = item.sub_items;
+    }
+    editItem = true;
+}
+
+function confirmDeleteItem(itemId:any) {
+    toDeleteId = itemId;
+    confirmDelModal = true;
+}
+
+function handleDeleteItem() {
+    if (!toDeleteId) {
+        return;
+    }
+    items = items.filter(e => e.id !== toDeleteId);
+    toDeleteId = null;
+    confirmDelModal = false;
+    dispatch('finalize-templates', items);
+}
 
 </script>
     
@@ -133,20 +188,37 @@ function handlePopupClose() {
 }} on:consider={handleOnConsider} on:finalize={handleFinalize}>
     {#each items as item(item.id)}
         <li animate:flip={{duration:flipDurationMs}}>
-            {item.heading}	
+            <div>{item.heading}</div>
+            <div class="w-6 ml-auto">
+                <CustomMenu >
+                    <MenuOption on:click={() => handleEditItem(item)}>
+                    <span class="text-[#CCD2E3] hover:text-black">
+                        <span class="inline-block h-4  pl-2 mr-2"><FaPen /></span>
+                        <span class="text-black">Edit</span>
+                    </span>
+                    </MenuOption>
+                    <MenuOption on:click={() => confirmDeleteItem(item.id)}>
+                    <span class="text-[#CCD2E3] hover:text-black">
+                        <span class="inline-block h-4  pl-2 mr-2"><FaTrashAlt /></span>
+                        <span class="text-black">Delete</span>
+                    </span>
+                    </MenuOption>
+                </CustomMenu>
+            </div>
         </li>
     {/each}
 </ul>
 
 <div class="flex mt-8">
-    <button on:click={() => addNewItem = true} 
+    <button on:click={handleNewItem} 
     class="w-10 h-10 border border-2 border-[#CCD2E3] mx-auto rounded-full text-[#CCD2E3] flex hover:border-black hover:text-black">
         <span class="inline-block text-center w-10 my-auto text-2xl">+</span>
     </button>
 </div>
 
-{#if addNewItem}
+{#if addNewItem || editItem}
 <PopupWrapper on:close={handlePopupClose} clickOutsideClose={true} >
+    <input type="hidden" bind:value={toEditId} />
     <h3 class="font-bold text-xl pb-4">Create new element</h3>
     <div>
         <div class="form-control w-full pr-10">
@@ -198,11 +270,22 @@ function handlePopupClose() {
 </PopupWrapper>
 {/if}
 
+{#if confirmDelModal}
+    <PopupWrapper on:close={() => confirmDelModal = false} clickOutsideClose={true} >
+        <h3 class=" font-normal text-lg text-center">Confirm deletion?</h3>
+        <div class="flex w-full justify-center pt-4">
+            <button class="btn btn-sm btn-outline w-20 ml-2" on:click={handleDeleteItem} >Yes</button>
+            <button class="btn btn-sm w-20 ml-2" on:click={() => confirmDelModal = false}>Cancel</button>
+        </div>
+    </PopupWrapper>
+{/if}
+
 <style lang="postcss">
 #draggable-items-list li {
     @apply w-full font-light text-lg;
     @apply border border-gray-200;
     @apply bg-white rounded-md;
     @apply p-3 mb-2;
+    @apply flex flex-row;
 }
 </style>
