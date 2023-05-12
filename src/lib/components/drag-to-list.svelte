@@ -71,9 +71,6 @@ const deleteDocItem = function() {
 };
 
 const deleteDocSubItem = function() {
-    console.log(tempDocItem);
-    console.log(tempDocSubItem);
-
     tempDocItem.sub_items = tempDocItem.sub_items.filter((item) => item.id !== tempDocSubItem.id);
 
     items = items.map((item) => {
@@ -191,6 +188,14 @@ function closeConfirmDone() {
     confirmDoneModal = false;
     confirmUndoneModal = false;
 }
+
+function checkSubItems(item: docItem) {
+    tempDocItem = item;
+    const unchecked: Array<docItemSubItem> = item.sub_items?.filter(e => !e.checked);
+    if (unchecked.length === 0) {
+        confirmDoneModal = true;
+    }
+}
 </script>
 <svelte:window on:keydown={handleEscape} />
 <section use:dndzone={{
@@ -245,8 +250,8 @@ function closeConfirmDone() {
             {#if item.sub_items}
             <ul class="chckbox-list my-6">
                 {#each item.sub_items as sub_item(sub_item.id)}
-                <li class="flex items-center"><label class="w-[90%]"> 
-                    <input type="checkbox" bind:checked={sub_item.checked} disabled={item.done} />
+                <li class="flex items-center"><label class="w-[90%]">
+                    <input type="checkbox" bind:checked={sub_item.checked} disabled={item.done} on:change={() => checkSubItems(item)} />
                     <span>{sub_item.label}</span>
                     </label>
                     {#if adminMode && !item.done}
