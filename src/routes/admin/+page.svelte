@@ -9,7 +9,7 @@ import { onMount } from 'svelte';
 import {tempdb} from '$lib/temp/tempdb';
 
 let data = tempdb.get();
-let cases: Array<caseItem> = data ? [...data] : [];
+// let cases: Array<caseItem> = data ? [...data] : []; //handled in tht $: statement
 let confirmationModal: boolean = false;
 let addNewModal: boolean = false;
 let selectedCase: caseItem;
@@ -23,15 +23,21 @@ let newCaseErrors = {
   'hasErrors': false
 };
 
+let showOnlyMine:boolean = true;
+let myId:number = 1;
+let searchStr:string;
+let statusFilter:string;
+
 onMount(() => {
     if (auth.isLogged()) {
         username = auth.isLogged();
     }
+    filterCases();
 });
 
 function handleDeleteCase() {
-  cases = cases.filter((item) => item.case_number !== selectedCase.case_number);
-  tempdb.set(cases);
+  data = data ? data.filter((item) => item.case_number !== selectedCase.case_number) : [];
+  tempdb.set(data);
   confirmationModal = false;
 }
 
@@ -56,23 +62,64 @@ function addNew() {
     return;
   }
 
+  const todayStr = new Intl.DateTimeFormat('dk').format(new Date());
   let newCase: caseItem = {
     case_number: newCaseNum,
-    address: newCaseAddress
+    address: newCaseAddress,
+    created_by: 1,
+    status: 'new',
+    last_update: todayStr
   };
-  cases = [...cases, newCase];
+  data = [newCase, ...data ?? []];
   addNewModal = false;
   resetFormValidation();
-  tempdb.set(cases);
+  tempdb.set(data);
+  // cases = [...data]; //this is hanled in $:
+}
+
+function filterCases() {
+  cases = [...data ?? []];
+  if (showOnlyMine) {
+    cases = cases.filter(e => e.created_by === myId );
+  }
+  if (searchStr && searchStr.length >= 3) {
+    // console.log(searchStr);
+    cases = cases.filter((e) => e.address.search( new RegExp(searchStr, 'i')) > -1 || e.case_number.search( new RegExp(searchStr, 'i')) > -1 );
+  }
+  if (statusFilter && statusFilter !== '') {
+    console.log('sttus filter', statusFilter);
+    cases = cases.filter(e => e.status === statusFilter );
+  }
+}
+
+$: cases = [...data ?? []];
+$: {
+  cases = cases;
+  filterCases();
 }
 
 </script>
 
 <section class="flex flex-col w-[90%] md:w-[60%] mx-auto pt-16 pb-8">
   <div><h2 class="text-lg font-bold">{username}</h2></div>
-  <div class="form-control flex flex-row items-center justify-end">
-    <label class="label cursor-pointer flex pr-4 text-lg text-[#7a7a7a]">Show only my cases</label>
-    <input type="checkbox" class="toggle" checked />
+  <div class="form-control flex flex-row items-center mt-3">
+
+    <div class="form-control w-1/3 mr-6">
+      <input type="text" class="input input-sm input-bordered rounded-md" placeholder="Search" on:keyup={filterCases} bind:value={searchStr}  />
+    </div>
+    <div class="form-control w-1/6">
+      <select class="select select-sm select-bordered rounded-md w-full font-normal" bind:value={statusFilter} on:change={filterCases}>
+        <option value="">Filter by Status</option>
+        <option value="new">New</option>
+        <option value="pending">Pending</option>
+        <option value="done">Done</option>
+      </select>
+    </div>
+    <div class="form-control w-[14rem] flex flex-row items-center ml-auto">
+      <label class="label cursor-pointer flex pr-2 text-lg text-[#7a7a7a] w-[13em]">Show only my cases</label>
+      <input type="checkbox" class="toggle"  bind:checked={showOnlyMine} on:change={filterCases} />
+    </div>
+
   </div>
   {#each cases as caseItem (caseItem.case_number)}
     <a href="/admin/{caseItem.case_number}" in:fly animate:flip={{duration:600}} 

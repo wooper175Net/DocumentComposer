@@ -9,6 +9,7 @@ import {cubicIn} from 'svelte/easing';
 import PopupWrapper from "$lib/components/shared/PopupWrapper.svelte";
 import IconFolderDel from "$lib/components/icons/icon-folder-del.svelte";
 import IconCircleDblCheck from "$lib/components/icons/icon-circle-dbl-check.svelte";
+import IconCircleDblCheckStrout from "$lib/components/icons/icon-circle-dbl-check-strout.svelte";
 import IconCirleDel from "$lib/components/icons/icon-cirle-del.svelte";
 import FaPen from 'svelte-icons/fa/FaPen.svelte'
 import { createEventDispatcher } from 'svelte';
@@ -26,6 +27,7 @@ const morphDisabled = true;
 let subItemModal = false;
 let confirmDelModal = false;
 let confirmDoneModal = false;
+let confirmUndoneModal = false;
 export let adminMode = false;
 
 let tempDocItem;
@@ -69,9 +71,6 @@ const deleteDocItem = function() {
 };
 
 const deleteDocSubItem = function() {
-    console.log(tempDocItem);
-    console.log(tempDocSubItem);
-
     tempDocItem.sub_items = tempDocItem.sub_items.filter((item) => item.id !== tempDocSubItem.id);
 
     items = items.map((item) => {
@@ -122,8 +121,12 @@ function saveDocSubItem() {
     dispatch('finalize', items);
 }
 
-function confirmItemDone(item) {
-    confirmDoneModal = true;
+function confirmItemDoneToggle(item) {
+    if (item.done) {
+        confirmUndoneModal = true;
+    } else {
+        confirmDoneModal = true;
+    }
     tempDocItem = item;
 }
 
@@ -131,12 +134,13 @@ function checkItemDone() {
     let itemToCheck = tempDocItem;
     items = items.map((item) => {
         if (item.id === itemToCheck.id) {
-            item.done = true;
-            item.sub_items?.forEach((subItem) => subItem.checked = true);
+            item.done = confirmDoneModal;
+            item.sub_items?.forEach((subItem) => subItem.checked = confirmDoneModal);
         }
         return item;
     });
     confirmDoneModal = false;
+    confirmUndoneModal = false;
     dispatch('finalize', items);
 }
 
@@ -158,7 +162,7 @@ function handleEscape(e) {
 }
 
 function handleEnterKey(e, item) {
-    if (e.key !== 'Enter') {
+    if (e.key !== 'Enter' || (!editItemDesc && !editItemHead)) {
         return;
     }
     dispatch('finalize', items);
@@ -166,6 +170,32 @@ function handleEnterKey(e, item) {
     editItemHead = null;
 }
 
+function inlineEditHeadClick(item: docItem) {
+    if(editItemHead || item.done) {
+        return;
+    }
+    editItemHead = item.id;
+}
+
+function inlineEditDescClick(item: docItem) {
+    if(editItemDesc || item.done) {
+        return;
+    }
+    editItemDesc = item.id;
+}
+
+function closeConfirmDone() {
+    confirmDoneModal = false;
+    confirmUndoneModal = false;
+}
+
+function checkSubItems(item: docItem) {
+    tempDocItem = item;
+    const unchecked: Array<docItemSubItem> = item.sub_items?.filter(e => !e.checked);
+    if (unchecked.length === 0) {
+        confirmDoneModal = true;
+    }
+}
 </script>
 <svelte:window on:keydown={handleEscape} />
 <section use:dndzone={{
@@ -176,10 +206,10 @@ function handleEnterKey(e, item) {
     <div class="card w-full bg-base-100 shadow-lg mb-4 rounded-lg" class:done={item.done} animate:flip={{duration:flipDurationMs}}>
         <div class="card-body p-4 pl-6">
             <div class="card-title font-medium text-xl flex items-baseline">
-                <span class="cursor-pointer w-full"
-                    on:mouseenter={() => showEditHead = item.id}  
+                <span class="w-full" class:cursor-pointer={!item.done}
+                    on:mouseenter={() => showEditHead = item.id}
                     on:mouseleave={() => showEditHead = null}
-                    on:click={() => {editItemHead = item.id;}}
+                    on:click={() => inlineEditHeadClick(item)}
                     on:keyup={(e) => handleEnterKey(e, item)}
                 >
                     {#if editItemHead === item.id}
@@ -195,16 +225,16 @@ function handleEnterKey(e, item) {
                     <span>{item.type === 'reservation' ? '!' : '?'}</span>
                 </div>
             </div>
-            <div
+            <div class:cursor-pointer={!item.done}
                 on:mouseenter={() => showEditDesc = item.id}  
                 on:mouseleave={() => showEditDesc = null}
-                on:click={() => editItemDesc = item.id}
+                on:click={() => inlineEditDescClick(item)}
                 on:keyup={(e) => handleEnterKey(e, item)}
             >
             {#if editItemDesc === item.id}
                 <textarea bind:value={item.desc} class="textarea textarea-bordered w-full h-[5rem] rounded-md"></textarea>
             {:else}
-                <p class="text-[#787878] text-lg cursor-pointer">
+                <p class="text-[#787878] text-lg">
                     {item.desc ?? ''}
                 {#if showEditDesc === item.id && editItemDesc !== item.id}
                 <span class="inline-block h-4 text-[#CCD2E3] pl-2"><FaPen /></span>
@@ -220,8 +250,8 @@ function handleEnterKey(e, item) {
             {#if item.sub_items}
             <ul class="chckbox-list my-6">
                 {#each item.sub_items as sub_item(sub_item.id)}
-                <li class="flex items-center"><label class="w-[90%]"> 
-                    <input type="checkbox" bind:checked={sub_item.checked} disabled={item.done} />
+                <li class="flex items-center"><label class="w-[90%]">
+                    <input type="checkbox" bind:checked={sub_item.checked} disabled={item.done} on:change={() => checkSubItems(item)} />
                     <span>{sub_item.label}</span>
                     </label>
                     {#if adminMode && !item.done}
@@ -243,9 +273,18 @@ function handleEnterKey(e, item) {
             
             <div class="flex justify-end h-6 gap-2">
                 <button on:click={() => confirmDocItemToDel(item) }>
-                    <IconFolderDel class="stroke-[#cecece] w-6 h-6 hover:stroke-black " /></button>
-                <button on:click={() => confirmItemDone(item)}
-                ><IconCircleDblCheck class="stroke-[#cecece] w-6 h-6 hover:stroke-black " /></button>
+                    <IconFolderDel class="stroke-[#cecece] w-6 h-6 hover:stroke-black " />
+                </button>
+                <button on:click={() => confirmItemDoneToggle(item)}>
+                    <IconCircleDblCheck class="stroke-[#cecece] w-6 h-6 hover:stroke-black " />
+                </button>
+            </div>
+            {/if}
+            {#if item.done}
+            <div class="flex justify-end h-6 gap-2">
+                <button on:click={() => confirmItemDoneToggle(item)}>
+                    <IconCircleDblCheckStrout class="stroke-red-800 w-6 h-6 hover:stroke-black " />
+                </button>
             </div>
             {/if}
         </div>
@@ -277,12 +316,14 @@ function handleEnterKey(e, item) {
 {/if}
 
 
-{#if confirmDoneModal}
-    <PopupWrapper on:close={() => confirmDoneModal = false} clickOutsideClose={true} >
-        <h3 class=" font-normal text-lg text-center">Mark item as done?</h3>
+{#if confirmDoneModal || confirmUndoneModal}
+    <PopupWrapper on:close={closeConfirmDone} clickOutsideClose={true} >
+        <h3 class=" font-normal text-lg text-center">
+            {confirmDoneModal ? 'Mark item as done?' : 'Mark item (and all sub-items) as undone?'}
+        </h3>
         <div class="flex w-full justify-center pt-4">
             <button class="btn btn-sm btn-outline w-20 ml-2" on:click={checkItemDone} >Yes</button>
-            <button class="btn btn-sm w-20 ml-2" on:click={() => confirmDoneModal = false}>Cancel</button>
+            <button class="btn btn-sm w-20 ml-2" on:click={closeConfirmDone}>Cancel</button>
         </div>
     </PopupWrapper>
 {/if}

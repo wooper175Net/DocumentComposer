@@ -8,6 +8,8 @@ let caseItems: Array<caseItem> = [
         case_number: '895123',
         address: 'Baker Street 12B',
         last_update: '21 Apr 2023',
+        created_by: 2,
+        status: 'new',
         doc_itmes:  [
             {
               id: 4,
@@ -40,6 +42,8 @@ let caseItems: Array<caseItem> = [
         case_number: '895456',
         address: 'Sunshine Valley, Copenhagen',
         last_update: '21 Apr 2023',
+        created_by: 1,
+        status: 'pending',
         doc_itmes:  [
           {
             id: 5,
@@ -71,7 +75,9 @@ let caseItems: Array<caseItem> = [
         id: 789,
         case_number: '895789',
         address: 'Botev 3 str, Sofia',
-        last_update: '21 Apr 2023'
+        last_update: '21 Apr 2023',
+        created_by: 1,
+        status: 'done'
     }
 ] ;
 

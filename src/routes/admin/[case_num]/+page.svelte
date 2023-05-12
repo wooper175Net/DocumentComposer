@@ -51,7 +51,7 @@ async function filterItems() {
             <div class="w-1/3">
               <p class="pb-2">Case Number: {caseItem?.case_number}</p>
               <p class="pb-2">Address: {caseItem?.address}</p>
-              <p>Last Update: TODO</p>
+              <p>Last Update: {caseItem?.last_update}</p>
             </div>
             <div class="w-2/3">
               <p>Public URL: www.domain.reservationer.dk/{data.case_num}</p>
