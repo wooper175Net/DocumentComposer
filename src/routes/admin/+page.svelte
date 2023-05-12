@@ -62,11 +62,13 @@ function addNew() {
     return;
   }
 
+  const todayStr = new Intl.DateTimeFormat('dk').format(new Date());
   let newCase: caseItem = {
     case_number: newCaseNum,
     address: newCaseAddress,
     created_by: 1,
-    status: 'new'
+    status: 'new',
+    last_update: todayStr
   };
   data = [newCase, ...data ?? []];
   addNewModal = false;
