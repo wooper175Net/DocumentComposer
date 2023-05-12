@@ -237,7 +237,7 @@ function handleDeleteItem() {
             <label class="label">
               <span>Type</span>
             </label>
-            <select bind:value={newType}>
+            <select bind:value={newType} class="select select-sm select-bordered w-full max-w-xs rounded-md h-10 text-lg font-light">
                 <option value="reservation">Reservation</option>
                 <option value="question">Question</option>
             </select>

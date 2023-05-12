@@ -55,10 +55,6 @@ input.field.has-error, textarea.field.has-error {
     @apply input input-bordered rounded-md h-10 px-2 text-lg input-error;
 }
 
-.form-control select {
-    @apply select select-sm select-bordered w-full max-w-xs rounded-md h-10 text-lg font-light;
-}
-
 .form-control label span {
     @apply text-xl font-light;
 }
