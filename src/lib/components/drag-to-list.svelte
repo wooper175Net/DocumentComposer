@@ -9,6 +9,7 @@ import {cubicIn} from 'svelte/easing';
 import PopupWrapper from "$lib/components/shared/PopupWrapper.svelte";
 import IconFolderDel from "$lib/components/icons/icon-folder-del.svelte";
 import IconCircleDblCheck from "$lib/components/icons/icon-circle-dbl-check.svelte";
+import IconCircleDblCheckStrout from "$lib/components/icons/icon-circle-dbl-check-strout.svelte";
 import IconCirleDel from "$lib/components/icons/icon-cirle-del.svelte";
 import FaPen from 'svelte-icons/fa/FaPen.svelte'
 import { createEventDispatcher } from 'svelte';
@@ -26,6 +27,7 @@ const morphDisabled = true;
 let subItemModal = false;
 let confirmDelModal = false;
 let confirmDoneModal = false;
+let confirmUndoneModal = false;
 export let adminMode = false;
 
 let tempDocItem;
@@ -122,8 +124,12 @@ function saveDocSubItem() {
     dispatch('finalize', items);
 }
 
-function confirmItemDone(item) {
-    confirmDoneModal = true;
+function confirmItemDoneToggle(item) {
+    if (item.done) {
+        confirmUndoneModal = true;
+    } else {
+        confirmDoneModal = true;
+    }
     tempDocItem = item;
 }
 
@@ -131,12 +137,13 @@ function checkItemDone() {
     let itemToCheck = tempDocItem;
     items = items.map((item) => {
         if (item.id === itemToCheck.id) {
-            item.done = true;
-            item.sub_items?.forEach((subItem) => subItem.checked = true);
+            item.done = confirmDoneModal;
+            item.sub_items?.forEach((subItem) => subItem.checked = confirmDoneModal);
         }
         return item;
     });
     confirmDoneModal = false;
+    confirmUndoneModal = false;
     dispatch('finalize', items);
 }
 
@@ -178,6 +185,11 @@ function inlineEditDescClick(item: docItem) {
         return;
     }
     editItemDesc = item.id;
+}
+
+function closeConfirmDone() {
+    confirmDoneModal = false;
+    confirmUndoneModal = false;
 }
 </script>
 <svelte:window on:keydown={handleEscape} />
@@ -256,9 +268,18 @@ function inlineEditDescClick(item: docItem) {
             
             <div class="flex justify-end h-6 gap-2">
                 <button on:click={() => confirmDocItemToDel(item) }>
-                    <IconFolderDel class="stroke-[#cecece] w-6 h-6 hover:stroke-black " /></button>
-                <button on:click={() => confirmItemDone(item)}
-                ><IconCircleDblCheck class="stroke-[#cecece] w-6 h-6 hover:stroke-black " /></button>
+                    <IconFolderDel class="stroke-[#cecece] w-6 h-6 hover:stroke-black " />
+                </button>
+                <button on:click={() => confirmItemDoneToggle(item)}>
+                    <IconCircleDblCheck class="stroke-[#cecece] w-6 h-6 hover:stroke-black " />
+                </button>
+            </div>
+            {/if}
+            {#if item.done}
+            <div class="flex justify-end h-6 gap-2">
+                <button on:click={() => confirmItemDoneToggle(item)}>
+                    <IconCircleDblCheckStrout class="stroke-red-800 w-6 h-6 hover:stroke-black " />
+                </button>
             </div>
             {/if}
         </div>
@@ -290,12 +311,14 @@ function inlineEditDescClick(item: docItem) {
 {/if}
 
 
-{#if confirmDoneModal}
-    <PopupWrapper on:close={() => confirmDoneModal = false} clickOutsideClose={true} >
-        <h3 class=" font-normal text-lg text-center">Mark item as done?</h3>
+{#if confirmDoneModal || confirmUndoneModal}
+    <PopupWrapper on:close={closeConfirmDone} clickOutsideClose={true} >
+        <h3 class=" font-normal text-lg text-center">
+            {confirmDoneModal ? 'Mark item as done?' : 'Mark item (and all sub-items) as undone?'}
+        </h3>
         <div class="flex w-full justify-center pt-4">
             <button class="btn btn-sm btn-outline w-20 ml-2" on:click={checkItemDone} >Yes</button>
-            <button class="btn btn-sm w-20 ml-2" on:click={() => confirmDoneModal = false}>Cancel</button>
+            <button class="btn btn-sm w-20 ml-2" on:click={closeConfirmDone}>Cancel</button>
         </div>
     </PopupWrapper>
 {/if}

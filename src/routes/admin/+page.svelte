@@ -60,7 +60,7 @@ function addNew() {
     case_number: newCaseNum,
     address: newCaseAddress
   };
-  cases = [...cases, newCase];
+  cases = [newCase, ...cases];
   addNewModal = false;
   resetFormValidation();
   tempdb.set(cases);
