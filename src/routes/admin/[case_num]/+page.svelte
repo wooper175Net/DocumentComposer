@@ -26,6 +26,7 @@ function handleFinalize(e: any) {
   if (!caseItem)
     return;
   caseItem.doc_itmes = [...e.detail];
+  caseItem.status = 'pending';
   let caseIndex = cases.findIndex((item) => item.case_number === caseItem?.case_number);
   cases[caseIndex].doc_itmes = caseItem.doc_itmes;
   tempdb.set(cases);

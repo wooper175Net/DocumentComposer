@@ -4,7 +4,7 @@ import type { docItem } from "$lib/interfaces/docItem";
 import type { docItemSubItem } from "$lib/interfaces/docItemSubItem"
 import {dndzone, SHADOW_ITEM_MARKER_PROPERTY_NAME} from 'svelte-dnd-action';
 import {flip} from 'svelte/animate';
-import {fade, fly} from 'svelte/transition';
+import {fade} from 'svelte/transition';
 import {cubicIn} from 'svelte/easing';
 import PopupWrapper from "$lib/components/shared/PopupWrapper.svelte";
 import IconFolderDel from "$lib/components/icons/icon-folder-del.svelte";
@@ -17,12 +17,15 @@ import { createEventDispatcher } from 'svelte';
 const dispatch = createEventDispatcher();
 
 const flipDurationMs:number = 200;
-    
+
 export let items: Array<docItem>;
 export let type: string = 'draggable';
 const dropTargetStyle = {outline: 'none'};
 const dropTargetClasses = [ 'drop-shadow-xl' ];
 const morphDisabled = true;
+let dragDisabled = true;
+
+$: dragDisabled = items.length === 0;
 
 let subItemModal = false;
 let confirmDelModal = false;
@@ -35,6 +38,7 @@ let tempDocSubItem;
 let whatToDelete: Function;
 
 let newSubItemTitle: string;
+let newSubItemError = false;
 
 let showEditHead:number|null;
 let showEditDesc:number|null;
@@ -90,8 +94,6 @@ function addDocSubItem(item: docItem) {
     tempDocItem = item;
 }
 
-
-let newSubItemError = false;
 function saveDocSubItem() {
     newSubItemError = false;
 
@@ -199,7 +201,7 @@ function checkSubItems(item: docItem) {
 </script>
 <svelte:window on:keydown={handleEscape} />
 <section use:dndzone={{
-    items, flipDurationMs, type, dropTargetStyle, dropTargetClasses, morphDisabled
+    items, flipDurationMs, type, dropTargetStyle, dropTargetClasses, morphDisabled, dragDisabled
 }} on:consider={handleSort} on:finalize={handleFinalize}>
 
 {#each items as item(item.id)}
@@ -293,7 +295,7 @@ function checkSubItems(item: docItem) {
 {:else} 
     <div class="h-40 border rounded-lg bg-gray-100 border-dashed border-gray-400"></div>
 {/each}
-
+</section>
 {#if subItemModal}
     <PopupWrapper on:close={() => subItemModal = false} clickOutsideClose={false} >
         <h3 class=" font-normal text-lg">Add Sub Item</h3>
@@ -328,7 +330,7 @@ function checkSubItems(item: docItem) {
     </PopupWrapper>
 {/if}
 
-</section>
+
 <style lang="postcss">
 .chckbox-list li label {
     @apply label cursor-pointer justify-start;
