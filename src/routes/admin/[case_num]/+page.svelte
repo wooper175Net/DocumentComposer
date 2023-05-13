@@ -27,6 +27,11 @@ function handleFinalize(e: any) {
     return;
   caseItem.doc_itmes = [...e.detail];
   caseItem.status = 'pending';
+  let checkDone = true;
+	caseItem.doc_itmes.forEach((e: docItem) => {
+		checkDone = checkDone && (e.done ?? false);
+		checkDone ? caseItem.status = 'done' : caseItem.status = 'pending'
+	});
   let caseIndex = cases.findIndex((item) => item.case_number === caseItem?.case_number);
   cases[caseIndex].doc_itmes = caseItem.doc_itmes;
   tempdb.set(cases);
