@@ -210,8 +210,8 @@ function handleDeleteItem() {
 </ul>
 
 <div class="flex mt-8">
-    <button on:click={handleNewItem} 
-    class="w-10 h-10 border border-2 border-[#CCD2E3] mx-auto rounded-full text-[#CCD2E3] flex hover:border-black hover:text-black">
+    <button on:click={handleNewItem} data-tip="Add new Template"
+    class="w-10 h-10 border border-2 border-[#CCD2E3] mx-auto rounded-full text-[#CCD2E3] flex hover:border-black hover:text-black tooltip">
         <span class="inline-block text-center w-10 my-auto text-2xl">+</span>
     </button>
 </div>

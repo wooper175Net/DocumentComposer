@@ -267,24 +267,24 @@ function checkSubItems(item: docItem) {
             {/if}
             {#if adminMode && !item.done}
             <div class="flex">
-                <button on:click={()=> addDocSubItem(item) } 
-                class="w-10 h-10 border border-2 border-[#CCD2E3] mx-auto rounded-full text-[#CCD2E3] flex hover:border-black hover:text-black">
+                <button on:click={()=> addDocSubItem(item) } data-tip="Add new sub-item"
+                class="tooltip w-10 h-10 border border-2 border-[#CCD2E3] mx-auto rounded-full text-[#CCD2E3] flex hover:border-black hover:text-black">
                     <span class="inline-block text-center w-10 my-auto text-2xl">+</span>
                 </button>
             </div>
             
             <div class="flex justify-end h-6 gap-2">
-                <button on:click={() => confirmDocItemToDel(item) }>
+                <button on:click={() => confirmDocItemToDel(item) } class="tooltip" data-tip="Delete item">
                     <IconFolderDel class="stroke-[#cecece] w-6 h-6 hover:stroke-black " />
                 </button>
-                <button on:click={() => confirmItemDoneToggle(item)}>
+                <button on:click={() => confirmItemDoneToggle(item)} class="tooltip" data-tip="Mark item as DONE">
                     <IconCircleDblCheck class="stroke-[#cecece] w-6 h-6 hover:stroke-black " />
                 </button>
             </div>
             {/if}
             {#if item.done}
             <div class="flex justify-end h-6 gap-2">
-                <button on:click={() => confirmItemDoneToggle(item)}>
+                <button on:click={() => confirmItemDoneToggle(item)} class="tooltip" data-tip="Mark item as UNDONE">
                     <IconCircleDblCheckStrout class="stroke-red-800 w-6 h-6 hover:stroke-black " />
                 </button>
             </div>
