@@ -13,6 +13,9 @@
 			"$lib": ["./src/lib"],
 			"$lib/*": ["./src/lib/*"]
 		}
+	},
+	"ts-node": {
+		"esm": true
 	}
 	// Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
 	//
