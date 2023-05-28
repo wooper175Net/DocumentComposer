@@ -7,6 +7,7 @@ import PopupWrapper from '$lib/components/shared/PopupWrapper.svelte';
 import { auth } from '$lib/auth';
 import { onMount } from 'svelte';
 import {tempdb} from '$lib/temp/tempdb';
+import { page } from '$app/stores'
 
 let data = tempdb.get();
 // let cases: Array<caseItem> = data ? [...data] : []; //handled in tht $: statement
@@ -97,11 +98,10 @@ $: {
   cases = cases;
   filterCases();
 }
-
 </script>
 
 <section class="flex flex-col w-[90%] md:w-[60%] mx-auto pt-16 pb-8">
-  <div><h2 class="text-lg font-bold">{username}</h2></div>
+  <div><h2 class="text-lg font-bold">{$page.data.user.username}</h2></div>
   <div class="form-control flex flex-row items-center mt-3">
 
     <div class="form-control w-1/3 mr-6">

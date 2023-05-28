@@ -1,16 +1,7 @@
 <script lang="ts">
-import { onMount } from "svelte";
-import {auth} from '$lib/auth'
-
-onMount(() => {
-    if (!auth.isLogged()) {
-        window.location.href = '/login';
-    }
-});
 
 function logout() {
-    auth.logout();
-    window.location.href = '/login';
+    window.location.href = '/logout';
 }
 
 </script>
