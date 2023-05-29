@@ -2,19 +2,20 @@
 import FaRegTrashAlt from 'svelte-icons/fa/FaRegTrashAlt.svelte';
 import { flip } from 'svelte/animate';
 import { fly } from "svelte/transition";
-import type {caseItem } from "$lib/interfaces/caseItem";
+import type {caseItem, createdUpdatedFields } from "$lib/interfaces/caseItem";
 import PopupWrapper from '$lib/components/shared/PopupWrapper.svelte';
-import { auth } from '$lib/auth';
 import { onMount } from 'svelte';
-import {tempdb} from '$lib/temp/tempdb';
-import { page } from '$app/stores'
+import type { PageData } from './$types';
+import type { Case } from '@prisma/client';
 
-let data = tempdb.get();
-// let cases: Array<caseItem> = data ? [...data] : []; //handled in tht $: statement
+
+export let data: PageData;
+
+let {user, cases} = data;
+
 let confirmationModal: boolean = false;
 let addNewModal: boolean = false;
-let selectedCase: caseItem;
-let username:string|null = '';
+let selectedCase: Case;
 
 let newCaseNum: string;
 let newCaseAddress: string;
@@ -25,32 +26,31 @@ let newCaseErrors = {
 };
 
 let showOnlyMine:boolean = true;
-let myId:number = 1;
 let searchStr:string;
 let statusFilter:string;
 
+let newCaseForm: HTMLFormElement;
+
 onMount(() => {
-    if (auth.isLogged()) {
-        username = auth.isLogged();
-    }
     filterCases();
 });
 
 function handleDeleteCase() {
-  data = data ? data.filter((item) => item.case_number !== selectedCase.case_number) : [];
-  tempdb.set(data);
+  casesTmp = casesTmp ? casesTmp.filter((item) => item.caseNumber !== selectedCase.caseNumber) : [];
   confirmationModal = false;
+  let frm = new FormData();
+  frm.append('del-id', selectedCase.id.toString());
+  fetch("?/delete", {method:'POST', body:frm});
 }
 
 function resetFormValidation() {
-  newCaseNum = '';
-  newCaseAddress = '';
   newCaseErrors.newCaseNum = false;
   newCaseErrors.newCaseAddress = false;
   newCaseErrors.hasErrors = false;
 }
 
-function addNew() {
+async function addNew() {
+  resetFormValidation();
   if (!newCaseNum || newCaseNum === '') {
     newCaseErrors.newCaseNum = true;
     newCaseErrors.hasErrors = true;
@@ -59,49 +59,40 @@ function addNew() {
     newCaseErrors.newCaseAddress = true;
     newCaseErrors.hasErrors = true;
   }
+  if ( cases.find((e: caseItem) => e.caseNumber === newCaseNum) ) {
+    newCaseErrors.newCaseNum = true;
+    newCaseErrors.hasErrors = true;
+  }
+  
   if (newCaseErrors.hasErrors) {
     return;
   }
-
-  const todayStr = new Intl.DateTimeFormat('dk').format(new Date());
-  let newCase: caseItem = {
-    case_number: newCaseNum,
-    address: newCaseAddress,
-    created_by: 1,
-    status: 'new',
-    last_update: todayStr
-  };
-  data = [newCase, ...data ?? []];
+  newCaseForm.submit();
   addNewModal = false;
-  resetFormValidation();
-  tempdb.set(data);
-  // cases = [...data]; //this is hanled in $:
+  
 }
 
 function filterCases() {
-  cases = [...data ?? []];
+  casesTmp = [...cases ?? []];
   if (showOnlyMine) {
-    cases = cases.filter(e => e.created_by === myId );
+    casesTmp = cases.filter((e: caseItem) => e.createdBy === user.id );
   }
   if (searchStr && searchStr.length >= 3) {
-    // console.log(searchStr);
-    cases = cases.filter((e) => e.address.search( new RegExp(searchStr, 'i')) > -1 || e.case_number.search( new RegExp(searchStr, 'i')) > -1 );
+    casesTmp = cases.filter((e: caseItem) => e.address.search( new RegExp(searchStr, 'i')) > -1 || e.caseNumber.search( new RegExp(searchStr, 'i')) > -1 );
   }
   if (statusFilter && statusFilter !== '') {
-    console.log('sttus filter', statusFilter);
-    cases = cases.filter(e => e.status === statusFilter );
+    casesTmp = cases.filter((e: caseItem) => e.status === statusFilter );
   }
 }
 
-$: cases = [...data ?? []];
+$: casesTmp = [...cases ?? []];
 $: {
-  cases = cases;
   filterCases();
 }
 </script>
 
 <section class="flex flex-col w-[90%] md:w-[60%] mx-auto pt-16 pb-8">
-  <div><h2 class="text-lg font-bold">{$page.data.user.username}</h2></div>
+  <div><h2 class="text-lg font-bold">{user.username}</h2></div>
   <div class="form-control flex flex-row items-center mt-3">
 
     <div class="form-control w-1/3 mr-6">
@@ -121,10 +112,10 @@ $: {
     </div>
 
   </div>
-  {#each cases as caseItem (caseItem.case_number)}
-    <a href="/admin/{caseItem.case_number}" in:fly animate:flip={{duration:600}} 
+  {#each casesTmp as caseItem (caseItem.caseNumber)}
+    <a href="/admin/{caseItem.caseNumber}" in:fly animate:flip={{duration:600}} 
       class="block card bg-white w-full rounded-md py-6 px-5 drop-shadow-md flex flex-row items-center text-lg font-light mb-3">
-      <div class="w-1/5">{caseItem.case_number}</div>
+      <div class="w-1/5">{caseItem.caseNumber}</div>
       <div class="w-5/6">{caseItem.address}</div>
       <button on:click|preventDefault={() => {confirmationModal = true; selectedCase = caseItem; }}
       class="text-[#9a9a9a] hover:text-black h-5 w-5 justify-end">
@@ -156,24 +147,30 @@ $: {
   <PopupWrapper on:close={() => addNewModal = false}>
   <div class="md:w-[350px]">
     <div class="card-title">Create new case</div>
+    <form method="post" action="?/create" bind:this={newCaseForm}>
     <div class="form-control w-full">
       <label class="label px-0">
         <span>Case Number</span>
       </label>
-      <input type="text" class="field" bind:value={newCaseNum} />
+      <input type="text" name="case-number" class="field" 
+        class:has-error={newCaseErrors.hasErrors && newCaseErrors.newCaseNum} 
+        bind:value={newCaseNum} />
     </div>
     <div class="form-control w-full">
       <label class="label px-0">
         <span>Address</span>
       </label>
-      <input type="text" class="field" required bind:value={newCaseAddress} />
+      <input type="text" class="field"
+        class:has-error={newCaseErrors.hasErrors && newCaseErrors.newCaseAddress}
+        name="case-address" required bind:value={newCaseAddress} />
     </div>
     <div class="flex justify-center mt-16">
-      <button on:click={addNew}
-        class="btn btn-sm btn-outline w-40 normal-case">
+      <button on:click|preventDefault={addNew}
+        class="btn btn-sm btn-outline w-40 normal-case" type="submit">
         Create
       </button>
     </div>
+    </form>
   </div>
   </PopupWrapper>
 {/if}
