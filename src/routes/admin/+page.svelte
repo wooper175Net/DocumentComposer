@@ -11,6 +11,8 @@ import type { Case } from '@prisma/client';
 
 export let data: PageData;
 
+console.log(data);
+
 let {user, cases} = data;
 
 let confirmationModal: boolean = false;

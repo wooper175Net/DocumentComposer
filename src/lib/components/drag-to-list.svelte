@@ -13,11 +13,14 @@ import IconCircleDblCheckStrout from "$lib/components/icons/icon-circle-dbl-chec
 import IconCirleDel from "$lib/components/icons/icon-cirle-del.svelte";
 import FaPen from 'svelte-icons/fa/FaPen.svelte'
 import { createEventDispatcher } from 'svelte';
+import { api } from "$lib/api";
+    import type { caseItem } from "$lib/interfaces/caseItem";
 
 const dispatch = createEventDispatcher();
 
 const flipDurationMs:number = 200;
 
+export let caseId: number|undefined;
 export let items: Array<docItem>;
 export let type: string = 'draggable';
 const dropTargetStyle = {outline: 'none'};
@@ -33,7 +36,7 @@ let confirmDoneModal = false;
 let confirmUndoneModal = false;
 export let adminMode = false;
 
-let tempDocItem;
+let tempDocItem: docItem;
 let tempDocSubItem;
 let whatToDelete: Function;
 
@@ -68,14 +71,19 @@ function confirmSubItemToDel(item:docItem, subItem: docItemSubItem) {
     whatToDelete = deleteDocSubItem;
 }
 
-const deleteDocItem = function() {
+const deleteDocItem = async function() {
+    try {
+        await api.deleteDoc(tempDocItem.id);
+    } catch(e) {
+        console.log(e);
+    }
+
     items = items.filter((item) => item.id !== tempDocItem.id);
     confirmDelModal = false;
-    dispatch('finalize', items);
 };
 
 const deleteDocSubItem = function() {
-    tempDocItem.sub_items = tempDocItem.sub_items.filter((item) => item.id !== tempDocSubItem.id);
+    tempDocItem.documentSubItems = tempDocItem.documentSubItems.filter((item) => item.id !== tempDocSubItem.id);
 
     items = items.map((item) => {
         if (item.id === tempDocItem.id) {
@@ -94,23 +102,28 @@ function addDocSubItem(item: docItem) {
     tempDocItem = item;
 }
 
-function saveDocSubItem() {
+async function saveDocSubItem() {
     newSubItemError = false;
 
     if (!newSubItemTitle || newSubItemTitle === '') {
         newSubItemError = true;
         return;
     }
-    const newSubItem: docItemSubItem  = {
-        id: Math.floor(Math.random() * 100000),
-        label: newSubItemTitle
-    };
+    // const newSubItem: docItemSubItem  = {
+    //     // id: Math.floor(Math.random() * 100000), //temp
+    //     label: newSubItemTitle
+    // };
 
-    if (!tempDocItem.sub_items) {
-        tempDocItem.sub_items = [];
+    // call endpoint here returning the new sub-item
+    const newSubItem = await api.addSubItem(tempDocItem.id, {label: newSubItemTitle});
+
+    console.log(newSubItem);
+
+    if (!tempDocItem.documentSubItems) {
+        tempDocItem.documentSubItems = [];
     }
 
-    tempDocItem.sub_items.push(newSubItem);
+    tempDocItem.documentSubItems.push(newSubItem);
     newSubItemTitle = '';
     subItemModal = false;
     items = items.map((item) => {
@@ -120,7 +133,7 @@ function saveDocSubItem() {
         return item;
     });
 
-    dispatch('finalize', items);
+    // dispatch('add-sub-item', items);
 }
 
 function confirmItemDoneToggle(item) {
@@ -132,19 +145,28 @@ function confirmItemDoneToggle(item) {
     tempDocItem = item;
 }
 
-function checkItemDone() {
+async function checkItemDone() {
+    if (!caseId) {
+        return;
+    }
+    try {
+        await api.toggleDoc(tempDocItem.id, confirmDoneModal);
+    } catch(e) {
+        console.log(e);
+    }
     let itemToCheck = tempDocItem;
     items = items.map((item) => {
         if (item.id === itemToCheck.id) {
             item.done = confirmDoneModal;
-            item.sub_items?.forEach((subItem) => subItem.checked = confirmDoneModal);
+            item.documentSubItems?.forEach((subItem) => subItem.checked = confirmDoneModal);
         }
         return item;
     });
     confirmDoneModal = false;
     confirmUndoneModal = false;
-    dispatch('finalize', items);
+    // dispatch('finalize', items);
 }
+
 
 $: items.sort((a,b) => {
     if (a.done && !b.done)
@@ -193,7 +215,7 @@ function closeConfirmDone() {
 
 function checkSubItems(item: docItem) {
     tempDocItem = item;
-    const unchecked: Array<docItemSubItem> = item.sub_items?.filter(e => !e.checked);
+    const unchecked: Array<docItemSubItem> = item.documentSubItems?.filter(e => !e.checked);
     if (unchecked.length === 0) {
         confirmDoneModal = true;
     }
@@ -249,9 +271,9 @@ function checkSubItems(item: docItem) {
                     <h2 class="card-title font-medium">{item.heading}</h2>
                 </div>
 			{/if}
-            {#if item.sub_items}
+            {#if item.documentSubItems}
             <ul class="chckbox-list my-6">
-                {#each item.sub_items as sub_item(sub_item.id)}
+                {#each item.documentSubItems as sub_item(sub_item.id)}
                 <li class="flex items-center"><label class="w-[90%]">
                     <input type="checkbox" bind:checked={sub_item.checked} disabled={item.done} on:change={() => checkSubItems(item)} />
                     <span>{sub_item.label}</span>

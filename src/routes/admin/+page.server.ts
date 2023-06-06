@@ -1,18 +1,6 @@
-import { error, fail } from '@sveltejs/kit';
-import type { PageServerLoad, Actions } from './$types';
+import { fail } from '@sveltejs/kit';
+import type { Actions } from './$types';
 import { prisma } from '$lib/server/prisma';
-
-export const load: PageServerLoad = async () => {
-	
-    const cases = await prisma.case.findMany()
-    if ( !cases) {
-        throw error (500, 'Error retrieving data')    
-    }
-
-    return { 
-        cases: cases 
-    }
-};
 
 export const actions: Actions = {
     create: async ({request, locals}) => {
@@ -31,7 +19,6 @@ export const actions: Actions = {
                 address,
                 status,
                 creator: {connect: { id: locals.user.id}}        
-                
             }
         })
         
