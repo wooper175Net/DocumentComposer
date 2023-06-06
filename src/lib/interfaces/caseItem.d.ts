@@ -5,7 +5,7 @@ interface caseItem {
     status: 'new'|'pending'|'done'
     caseNumber: string;
     address: string;
-    doc_itmes?: Array<docItem>;
+    documents: Array<docItem>;
     createdBy?: number;
 }
 
