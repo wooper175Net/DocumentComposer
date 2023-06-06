@@ -1,9 +1,8 @@
-import type { Handle } from '@sveltejs/kit'
+import { error, type Handle } from '@sveltejs/kit'
 import { prisma } from '$lib/server/prisma'
+import { sequence } from '@sveltejs/kit/hooks';
 
-
-
-export const handle: Handle = async ({ event, resolve }) => {
+export const handleSession: Handle = async ({ event, resolve }) => {
 	const session = event.cookies.get('session')
 
 	if (!session) {
@@ -25,3 +24,19 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	return await resolve(event)
 }
+
+export const handleApiAuth: Handle = async ({ event, resolve }) => {
+	const { locals, cookies, url } = event;
+
+	if (url.pathname.startsWith('/api')) {
+		if (!locals.user) {
+			throw error(401);
+		}
+	}
+
+	const response = await resolve(event);
+
+	return response;
+};
+
+export const handle = sequence(handleSession, handleApiAuth);

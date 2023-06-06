@@ -17,7 +17,6 @@ export const actions = {
 	login: async ({ cookies, request }) => {
 		const data = await request.formData()
 
-        console.log(data)
 		const username = data.get('username')
 		const password = data.get('password')
 
