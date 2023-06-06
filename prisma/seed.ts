@@ -119,8 +119,6 @@ async function main() {
     })
   }
 
-  // await prisma.$executeRawUnsafe(`TRUNCATE TABLE TemplateDocument;`)
-
   for (const td of templateData) {
     const templateData = await prisma.templateDocument.create({
       data: td

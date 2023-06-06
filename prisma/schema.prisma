@@ -41,6 +41,7 @@ model Document {
   desc       String?
   done       Boolean  @default(false)
   caseId     Int
+  sequence   Int      @default(0)
   createdAt  DateTime @default(now())
   lastUpdate DateTime @updatedAt
 
@@ -64,6 +65,6 @@ model TemplateDocument {
   type       String
   heading    String
   desc       String?
-	createdAt  DateTime @default(now())
+  createdAt  DateTime @default(now())
   lastUpdate DateTime @updatedAt
 }
