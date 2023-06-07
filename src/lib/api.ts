@@ -33,6 +33,12 @@ class Api {
         const json = await response.json();
         return json;
     }
+
+    async deleteSubItem(subItemId: number) {
+        let response = await fetch(`${this.apiUrl}/del-sub-item`, {method:'POST', body: JSON.stringify( { subItemId } )});
+        const json = await response.json();
+        return json;
+    }
 }
 
 export const api = new Api;

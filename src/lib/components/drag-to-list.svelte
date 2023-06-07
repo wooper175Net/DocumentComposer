@@ -82,7 +82,14 @@ const deleteDocItem = async function() {
     confirmDelModal = false;
 };
 
-const deleteDocSubItem = function() {
+const deleteDocSubItem = async function() {
+
+    try {
+        await api.deleteSubItem(tempDocSubItem.id);
+    } catch(e) {
+        console.log(e);
+    }
+
     tempDocItem.documentSubItems = tempDocItem.documentSubItems.filter((item) => item.id !== tempDocSubItem.id);
 
     items = items.map((item) => {
@@ -91,8 +98,6 @@ const deleteDocSubItem = function() {
         }
         return item;
     });
-
-    dispatch('finalize', items);
 
     confirmDelModal = false;
 }
@@ -109,15 +114,8 @@ async function saveDocSubItem() {
         newSubItemError = true;
         return;
     }
-    // const newSubItem: docItemSubItem  = {
-    //     // id: Math.floor(Math.random() * 100000), //temp
-    //     label: newSubItemTitle
-    // };
 
-    // call endpoint here returning the new sub-item
     const newSubItem = await api.addSubItem(tempDocItem.id, {label: newSubItemTitle});
-
-    console.log(newSubItem);
 
     if (!tempDocItem.documentSubItems) {
         tempDocItem.documentSubItems = [];
@@ -132,8 +130,6 @@ async function saveDocSubItem() {
         }
         return item;
     });
-
-    // dispatch('add-sub-item', items);
 }
 
 function confirmItemDoneToggle(item) {
@@ -164,7 +160,6 @@ async function checkItemDone() {
     });
     confirmDoneModal = false;
     confirmUndoneModal = false;
-    // dispatch('finalize', items);
 }
 
 
@@ -213,7 +208,7 @@ function closeConfirmDone() {
     confirmUndoneModal = false;
 }
 
-function checkSubItems(item: docItem) {
+function checkSubItems(item: docItem, subItem: docItemSubItem) {
     tempDocItem = item;
     const unchecked: Array<docItemSubItem> = item.documentSubItems?.filter(e => !e.checked);
     if (unchecked.length === 0) {
@@ -275,7 +270,7 @@ function checkSubItems(item: docItem) {
             <ul class="chckbox-list my-6">
                 {#each item.documentSubItems as sub_item(sub_item.id)}
                 <li class="flex items-center"><label class="w-[90%]">
-                    <input type="checkbox" bind:checked={sub_item.checked} disabled={item.done} on:change={() => checkSubItems(item)} />
+                    <input type="checkbox" checked={sub_item.checked} disabled={item.done} on:change={() => checkSubItems(item, sub_item)} />
                     <span>{sub_item.label}</span>
                     </label>
                     {#if adminMode && !item.done}
@@ -338,7 +333,6 @@ function checkSubItems(item: docItem) {
         </div>
     </PopupWrapper>
 {/if}
-
 
 {#if confirmDoneModal || confirmUndoneModal}
     <PopupWrapper on:close={closeConfirmDone} clickOutsideClose={true} >

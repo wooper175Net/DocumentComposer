@@ -3,11 +3,11 @@ import type { RequestHandler } from './$types';
 import { prisma } from '$lib/server/prisma';
 
 export const POST: RequestHandler = async ({ request }) => {
-	const data: {docId: number} = await request.json();
-
-    await prisma.document.delete({
+	const data: {subItemId: number} = await request.json();
+    
+    await prisma.documentSubItem.delete({
         where: {
-            id: data.docId
+            id: data.subItemId
         }
     });
 
