@@ -139,6 +139,17 @@ function confirmItemDoneToggle(item) {
         confirmDoneModal = true;
     }
     tempDocItem = item;
+
+    //sort items by sequence to maintain proper ordering
+    items.sort((a,b) => {
+        if (a.sequence < b.sequence) {
+            return -1;
+        }
+        if (a.sequence > b.sequence) {
+            return 1;
+        }
+        return 0;
+    })
 }
 
 async function checkItemDone() {
@@ -161,7 +172,6 @@ async function checkItemDone() {
     confirmDoneModal = false;
     confirmUndoneModal = false;
 }
-
 
 $: items.sort((a,b) => {
     if (a.done && !b.done)
@@ -210,6 +220,11 @@ function closeConfirmDone() {
 
 function checkSubItems(item: docItem, subItem: docItemSubItem) {
     tempDocItem = item;
+
+    console.log(subItem.checked);
+
+    api.toggleSubItem(subItem.id, subItem.checked);
+
     const unchecked: Array<docItemSubItem> = item.documentSubItems?.filter(e => !e.checked);
     if (unchecked.length === 0) {
         confirmDoneModal = true;
@@ -270,7 +285,7 @@ function checkSubItems(item: docItem, subItem: docItemSubItem) {
             <ul class="chckbox-list my-6">
                 {#each item.documentSubItems as sub_item(sub_item.id)}
                 <li class="flex items-center"><label class="w-[90%]">
-                    <input type="checkbox" checked={sub_item.checked} disabled={item.done} on:change={() => checkSubItems(item, sub_item)} />
+                    <input type="checkbox" bind:checked={sub_item.checked} disabled={item.done} on:change={() => checkSubItems(item, sub_item)} />
                     <span>{sub_item.label}</span>
                     </label>
                     {#if adminMode && !item.done}

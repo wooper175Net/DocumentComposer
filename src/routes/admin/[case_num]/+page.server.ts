@@ -17,7 +17,9 @@ export const load: PageServerLoad = (async ({ parent, params }) => {
         throw redirect(307, '/admin');
     }
 
-    const templates = prisma.templateDocument.findMany();
+    const templates = prisma.templateDocument.findMany({
+        include: {documentSubItems: true}
+    });
 
 
     return { 

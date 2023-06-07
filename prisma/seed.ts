@@ -50,7 +50,8 @@ const caseData = [
                 label: 'Donec tellus nulla, molestie bibendum eros quis, imperdiet consequat metus.'
               }
             ]
-          }
+          },
+          sequence: 1
         },
         {
           heading: 'Morbi hendrerit erat at vehicula cursus',
@@ -66,7 +67,8 @@ const caseData = [
                 label: 'Suspendisse non erat libero.'
               }
             ]
-          }
+          },
+          sequence: 2
         }
       ]
     }

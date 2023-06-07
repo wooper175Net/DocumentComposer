@@ -10,7 +10,17 @@ export const POST: RequestHandler = async ({ request }) => {
             id: data.docId
         },
         data: {
-            done: data.done
+            done: data.done,
+            documentSubItems: {
+                updateMany: {
+                    where: {
+                        documentId: data.docId
+                    },
+                    data: {
+                        checked: data.done
+                    }
+                }
+            }
         }
     });
 

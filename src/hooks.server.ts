@@ -28,7 +28,7 @@ export const handleSession: Handle = async ({ event, resolve }) => {
 export const handleApiAuth: Handle = async ({ event, resolve }) => {
 	const { locals, cookies, url } = event;
 
-	if (url.pathname.startsWith('/api')) {
+	if (url.pathname.startsWith('/api/')) {
 		if (!locals.user) {
 			throw error(401);
 		}

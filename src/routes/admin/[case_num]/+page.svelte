@@ -17,7 +17,6 @@ onMount(() => {
   if (!caseItem) {
     window.location.href = '/admin';
   }
-  console.log('CaseItem docs: ', caseItem?.documents);
 });
 
 const templateItems: Array<docItem> = data.templates;
@@ -31,7 +30,7 @@ async function handleDocDrag(e: any) {
     return;
   }
 
-  console.log(e.detail);
+  console.log('handleDocDrag', e.detail);
   let newDocList: Array<docItem> = [...e.detail];
 
   try {
@@ -43,7 +42,7 @@ async function handleDocDrag(e: any) {
 }
 
 function handleFinalizeTemplates(e:any) {
-  console.log(e.detail);
+  console.log('handlefilalizetemplates', e.detail);
   // templatedb.set([...e.detail]);
 }
 
@@ -52,8 +51,6 @@ async function filterItems() {
   commonDocItems = templateItems.filter((item) => item.heading.search( new RegExp(searchStr, 'i')) > -1 );
 }
 
-// $: docItems = caseItem?.documents ?? [];
-
 </script>
 
 <section class="grid grid-cols-12 w-full h-full">
@@ -61,12 +58,12 @@ async function filterItems() {
     <div class="card w-full bg-base-100 shadow-lg mb-4 rounded-lg" >
       <div class="card-body p-8 pl-6">
           <div class="flex flex-row text-black">
-            <div class="w-1/3">
+            <div class="w-1/2">
               <p class="pb-2">Case Number: {caseItem?.caseNumber}</p>
               <p class="pb-2">Address: {caseItem?.address}</p>
-              <p>Last Update: {caseItem?.lastUpdate}</p>
+              <p>Last Update: {caseItem?.lastUpdate ? caseItem.lastUpdate.toLocaleDateString('da-DK', {dateStyle: "medium"}) : ''}</p>
             </div>
-            <div class="w-2/3">
+            <div class="w-1/2">
               <p>Public URL: www.domain.reservationer.dk/{data.case_num}</p>
             </div>
           </div>

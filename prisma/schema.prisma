@@ -46,25 +46,28 @@ model Document {
   lastUpdate DateTime @updatedAt
 
   caseItem         Case              @relation(fields: [caseId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  documentSubItems DocumentSubItem[]
+  documentSubItems DocumentSubItem[] @relation("DocumentSubItems")
 }
 
 model DocumentSubItem {
-  id         Int      @id @default(autoincrement())
-  label      String
-  checked    Boolean  @default(false)
-  documentId Int
-  createdAt  DateTime @default(now())
-  lastUpdate DateTime @updatedAt
+  id                 Int      @id @default(autoincrement())
+  label              String
+  checked            Boolean  @default(false)
+  documentId         Int?
+  documentTemplateId Int?
+  createdAt          DateTime @default(now())
+  lastUpdate         DateTime @updatedAt
 
-  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  document         Document?         @relation("DocumentSubItems", fields: [documentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  documentTemplate TemplateDocument? @relation("TemplateSubItems", fields: [documentTemplateId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model TemplateDocument {
-  id         Int      @id @default(autoincrement())
-  type       String
-  heading    String
-  desc       String?
-  createdAt  DateTime @default(now())
-  lastUpdate DateTime @updatedAt
+  id               Int               @id @default(autoincrement())
+  type             String
+  heading          String
+  desc             String?
+  createdAt        DateTime          @default(now())
+  lastUpdate       DateTime          @updatedAt
+  documentSubItems DocumentSubItem[] @relation("TemplateSubItems")
 }

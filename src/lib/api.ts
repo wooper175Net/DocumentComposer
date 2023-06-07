@@ -39,6 +39,18 @@ class Api {
         const json = await response.json();
         return json;
     }
+
+    async toggleSubItem(subItemId: number, checked: boolean) {
+        let response = await fetch(`${this.apiUrl}/toggle-sub-item`, {method:'POST', body: JSON.stringify( { subItemId, checked } )});
+        const json = await response.json();
+        return json;
+    }
+
+    async createDocTemplate(docTemplateItem: docItem) {
+        let response = await fetch(`${this.apiUrl}/add-doc-template`, {method:'POST', body: JSON.stringify( { docTemplateItem } )});
+        const json = await response.json();
+        return json;
+    }
 }
 
 export const api = new Api;

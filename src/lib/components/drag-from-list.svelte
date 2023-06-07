@@ -9,8 +9,9 @@ import IconCirleDel from "$lib/components/icons/icon-cirle-del.svelte";
 import { createEventDispatcher } from 'svelte';
 import CustomMenu from "$lib/components/context-menu/CustomMenu.svelte";
 import MenuOption from '$lib/components/context-menu/MenuOption.svelte';
-import FaPen from 'svelte-icons/fa/FaPen.svelte'
-import FaTrashAlt from 'svelte-icons/fa/FaTrashAlt.svelte'
+import FaPen from 'svelte-icons/fa/FaPen.svelte';
+import FaTrashAlt from 'svelte-icons/fa/FaTrashAlt.svelte';
+import { api } from "$lib/api";
 
 const dispatch = createEventDispatcher();
 
@@ -29,7 +30,8 @@ let newHeading: string = '';
 let newDesc: string = '';
 let newType: string = 'reservation';
 let newSubItems: Array<docItemSubItem> = [
-    {id: Math.floor(Math.random() * 10000), label: ""}
+    // {id: Math.floor(Math.random() * 10000), label: ""}
+    { label: "" }
 ];
 
 let formErrors = {
@@ -68,7 +70,7 @@ function handleFinalize(e) {
         items = [...items];
         shouldIgnoreDndEvents = false;
     }
-    // dispatch('finalize-templates', items); //not needed for rearranging
+    dispatch('finalize-templates', items); //not needed for rearranging
 }
 
 function validateNewTemplate() {
@@ -85,7 +87,7 @@ function validateNewTemplate() {
     return !formErrors.hasErrors;
 }
 
-function saveNewTemplate() {
+async function saveNewTemplate() {
     if (!validateNewTemplate()) {
         return;
     }
@@ -97,23 +99,36 @@ function saveNewTemplate() {
         toEdit.heading = newHeading;
         toEdit.desc = newDesc;
         toEdit.type = newType;
-        toEdit.sub_items = newSubItems;
+        toEdit.documentSubItems = newSubItems;
         editItem = false;
         items = [...items];
     } else {
 
-        const newTempItem: docItem = {
-            id: Math.floor(Math.random() * 10000),
-            heading: newHeading,
-            desc: newDesc,
-            type: newType,
-            sub_items: newSubItems
-        };
+        // const toCreate: docItem = {
+        //     heading: newHeading,
+        //     desc: newDesc,
+        //     type: newType,
+        //     documentSubItems: newSubItems
+        // };
+
+        const newTempItem = await api.createDocTemplate(
+            {
+                heading: newHeading,
+                desc: newDesc,
+                type: newType,
+                documentSubItems: newSubItems
+            }
+            // toCreate
+        );
+// console.log(newTempItem.newDpc);
         items = [...items, newTempItem];
         addNewItem = false;
+
     }
     
-    dispatch('finalize-templates', items);
+    
+
+    // dispatch('finalize-templates', items);
     resetNewItemForm();
     resetFormErrors();
 }
@@ -141,6 +156,7 @@ function handleNewItem() {
 
 function handleNewSubItem() {
     newSubItems = [...newSubItems, {id: Math.floor(Math.random() * 10000), label: ""}];
+    // newSubItems = [...newSubItems, { label: "" }];
 }
 
 function handleRemoveSubItem(index: number) {
@@ -160,8 +176,8 @@ function handleEditItem(item: docItem) {
     newHeading = item.heading;
     newDesc = item.desc;
     newType = item.type;
-    if (item.sub_items && item.sub_items.length > 0) {
-        newSubItems = item.sub_items;
+    if (item.documentSubItems && item.documentSubItems.length > 0) {
+        newSubItems = item.documentSubItems;
     }
     editItem = true;
 }
@@ -178,7 +194,7 @@ function handleDeleteItem() {
     items = items.filter(e => e.id !== toDeleteId);
     toDeleteId = null;
     confirmDelModal = false;
-    dispatch('finalize-templates', items);
+    // dispatch('finalize-templates', items);
 }
 
 </script>
