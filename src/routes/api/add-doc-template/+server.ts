@@ -23,7 +23,9 @@ export const POST: RequestHandler = async ({ request }) => {
             }
         },
         include: {
-            documentSubItems: true
+            documentSubItems: {
+                orderBy: { id: 'asc'}
+            }
         }
     });
     

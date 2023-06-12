@@ -30,20 +30,17 @@ async function handleDocDrag(e: any) {
     return;
   }
 
-  console.log('handleDocDrag', e.detail);
   let newDocList: Array<docItem> = [...e.detail];
 
   try {
-    docItems = await api.updateCaseDocs(caseItem, newDocList);
+    const responseItems = await api.updateCaseDocs(caseItem, newDocList);
+    docItems = [...responseItems];
   } catch(e) {
-    console.log(e);
+    console.error("Error updating documents");
   }
-  
 }
 
 function handleFinalizeTemplates(e:any) {
-  console.log('handlefilalizetemplates', e.detail);
-  // templatedb.set([...e.detail]);
 }
 
 async function filterItems() {

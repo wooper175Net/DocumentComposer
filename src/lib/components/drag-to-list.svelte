@@ -14,7 +14,6 @@ import IconCirleDel from "$lib/components/icons/icon-cirle-del.svelte";
 import FaPen from 'svelte-icons/fa/FaPen.svelte'
 import { createEventDispatcher } from 'svelte';
 import { api } from "$lib/api";
-    import type { caseItem } from "$lib/interfaces/caseItem";
 
 const dispatch = createEventDispatcher();
 
@@ -74,30 +73,27 @@ function confirmSubItemToDel(item:docItem, subItem: docItemSubItem) {
 const deleteDocItem = async function() {
     try {
         await api.deleteDoc(tempDocItem.id);
+        items = items.filter((item) => item.id !== tempDocItem.id);
     } catch(e) {
-        console.log(e);
+        console.error("Deletion failed");
     }
-
-    items = items.filter((item) => item.id !== tempDocItem.id);
     confirmDelModal = false;
 };
 
 const deleteDocSubItem = async function() {
-
     try {
         await api.deleteSubItem(tempDocSubItem.id);
+        tempDocItem.documentSubItems = tempDocItem.documentSubItems.filter((item) => item.id !== tempDocSubItem.id);
+
+        items = items.map((item) => {
+            if (item.id === tempDocItem.id) {
+            return tempDocItem;
+            }
+            return item;
+        });
     } catch(e) {
-        console.log(e);
+        console.error('Deletion failed');
     }
-
-    tempDocItem.documentSubItems = tempDocItem.documentSubItems.filter((item) => item.id !== tempDocSubItem.id);
-
-    items = items.map((item) => {
-        if (item.id === tempDocItem.id) {
-           return tempDocItem;
-        }
-        return item;
-    });
 
     confirmDelModal = false;
 }
@@ -114,22 +110,27 @@ async function saveDocSubItem() {
         newSubItemError = true;
         return;
     }
+    try {
+        const newSubItem = await api.addSubItem(tempDocItem.id, {label: newSubItemTitle});
 
-    const newSubItem = await api.addSubItem(tempDocItem.id, {label: newSubItemTitle});
+        if (!tempDocItem.documentSubItems) {
+            tempDocItem.documentSubItems = [];
+        }
 
-    if (!tempDocItem.documentSubItems) {
-        tempDocItem.documentSubItems = [];
+        tempDocItem.documentSubItems.push(newSubItem);
+        newSubItemTitle = '';
+        
+        items = items.map((item) => {
+            if (item.id === tempDocItem.id) {
+            return tempDocItem;
+            }
+            return item;
+        });
+    } catch(e) {
+        console.error('Saving failed');
     }
 
-    tempDocItem.documentSubItems.push(newSubItem);
-    newSubItemTitle = '';
     subItemModal = false;
-    items = items.map((item) => {
-        if (item.id === tempDocItem.id) {
-           return tempDocItem;
-        }
-        return item;
-    });
 }
 
 function confirmItemDoneToggle(item) {
@@ -158,17 +159,18 @@ async function checkItemDone() {
     }
     try {
         await api.toggleDoc(tempDocItem.id, confirmDoneModal);
+    
+        let itemToCheck = tempDocItem;
+        items = items.map((item) => {
+            if (item.id === itemToCheck.id) {
+                item.done = confirmDoneModal;
+                item.documentSubItems?.forEach((subItem) => subItem.checked = confirmDoneModal);
+            }
+            return item;
+        });
     } catch(e) {
-        console.log(e);
+        console.error("Updating item failed");
     }
-    let itemToCheck = tempDocItem;
-    items = items.map((item) => {
-        if (item.id === itemToCheck.id) {
-            item.done = confirmDoneModal;
-            item.documentSubItems?.forEach((subItem) => subItem.checked = confirmDoneModal);
-        }
-        return item;
-    });
     confirmDoneModal = false;
     confirmUndoneModal = false;
 }
@@ -190,11 +192,16 @@ function handleEscape(e) {
     }
 }
 
-function handleEnterKey(e, item) {
+async function handleEnterKey(e, item: docItem) {
     if (e.key !== 'Enter' || (!editItemDesc && !editItemHead)) {
         return;
     }
-    dispatch('finalize', items);
+    try {
+        await api.updateDoc(item);
+    } catch(e) {
+        console.error('Update failed')
+    }
+
     editItemDesc = null;
     editItemHead = null;
 }
@@ -221,13 +228,15 @@ function closeConfirmDone() {
 function checkSubItems(item: docItem, subItem: docItemSubItem) {
     tempDocItem = item;
 
-    console.log(subItem.checked);
+    try {
+        api.toggleSubItem(subItem.id, subItem.checked);
 
-    api.toggleSubItem(subItem.id, subItem.checked);
-
-    const unchecked: Array<docItemSubItem> = item.documentSubItems?.filter(e => !e.checked);
-    if (unchecked.length === 0) {
-        confirmDoneModal = true;
+        const unchecked: Array<docItemSubItem> = item.documentSubItems?.filter(e => !e.checked);
+        if (unchecked.length === 0) {
+            confirmDoneModal = true;
+        }
+    } catch(e) {
+        console.error('Changing sub-item failed');
     }
 }
 </script>

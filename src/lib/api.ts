@@ -5,51 +5,54 @@ import type { docItemSubItem } from "$lib/interfaces/docItemSubItem";
 class Api {
     private apiUrl = '/api';
 
-    async updateCaseDocs(caseItem:caseItem, newDocList: Array<docItem>): Promise<docItem[]> {
-        const data = {
-            caseItem: caseItem,
-            newDocList: newDocList
-        };
-        
-        let response = await fetch(`${this.apiUrl}/update-docs`, {method:'POST', body: JSON.stringify(data)});
-        const newDocs = await response.json();
-        return newDocs;
+    async updateCaseDocs(caseItem:caseItem, newDocList: Array<docItem>) {
+        return this.sendApiRequest('update-docs', { caseItem, newDocList });
     }
 
     async deleteDoc(docId: number) {
-        let response = await fetch(`${this.apiUrl}/delete-doc`, {method:'POST', body: JSON.stringify( { docId } )});
-        const json = await response.json();
-        return json;
+        return this.sendApiRequest('delete-doc', { docId });
     }
 
     async toggleDoc(docId: number, done: boolean) {
-        let response = await fetch(`${this.apiUrl}/toggle-doc`, {method:'POST', body: JSON.stringify( { docId, done } )});
-        const json = await response.json();
-        return json;
+        return this.sendApiRequest('toggle-doc', { docId, done });
     }
 
     async addSubItem(docId: number, subItem: docItemSubItem) {
-        let response = await fetch(`${this.apiUrl}/add-sub-item`, {method:'POST', body: JSON.stringify( { docId, subItem } )});
-        const json = await response.json();
-        return json;
+        return this.sendApiRequest('add-sub-item', { docId, subItem });
     }
 
     async deleteSubItem(subItemId: number) {
-        let response = await fetch(`${this.apiUrl}/del-sub-item`, {method:'POST', body: JSON.stringify( { subItemId } )});
-        const json = await response.json();
-        return json;
+        return this.sendApiRequest('del-sub-item', { subItemId });
     }
 
     async toggleSubItem(subItemId: number, checked: boolean) {
-        let response = await fetch(`${this.apiUrl}/toggle-sub-item`, {method:'POST', body: JSON.stringify( { subItemId, checked } )});
-        const json = await response.json();
-        return json;
+        return this.sendApiRequest('toggle-sub-item', { subItemId, checked });
     }
 
     async createDocTemplate(docTemplateItem: docItem) {
-        let response = await fetch(`${this.apiUrl}/add-doc-template`, {method:'POST', body: JSON.stringify( { docTemplateItem } )});
-        const json = await response.json();
-        return json;
+        return this.sendApiRequest('add-doc-template', { docTemplateItem } );
+    }
+
+    async updateDocTemplate(docTemplateItem: docItem, deletedSubItems: Array<docItemSubItem>) {
+        return this.sendApiRequest('update-doc-template', { docTemplateItem, deletedSubItems });
+    }
+
+    async deleteDocTemplate(tempDocId: number) {
+        return this.sendApiRequest('del-doc-template', { tempDocId });
+    }
+
+    async updateDoc(updatedItem: docItem) {
+        return this.sendApiRequest('update-doc', { updatedItem });
+    }
+
+    private async sendApiRequest(endpoint: string, postObj: Object) {
+        let response = await fetch(`${this.apiUrl}/${endpoint}`, {method:'POST', body: JSON.stringify( postObj )});
+
+        if (!response.ok) {
+            throw new Error("Operation failed")
+        }
+
+        return await response.json();
     }
 }
 

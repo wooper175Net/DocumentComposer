@@ -30,9 +30,9 @@ let newHeading: string = '';
 let newDesc: string = '';
 let newType: string = 'reservation';
 let newSubItems: Array<docItemSubItem> = [
-    // {id: Math.floor(Math.random() * 10000), label: ""}
     { label: "" }
 ];
+let deletedSubItems: Array<docItemSubItem> = [];
 
 let formErrors = {
     newHeadingError: false,
@@ -101,34 +101,32 @@ async function saveNewTemplate() {
         toEdit.type = newType;
         toEdit.documentSubItems = newSubItems;
         editItem = false;
-        items = [...items];
+        
+        try {
+            await api.updateDocTemplate(toEdit, deletedSubItems);
+            items = [...items];
+        } catch (e) {
+            console.error("Template not updated");
+        }
+        
     } else {
-
-        // const toCreate: docItem = {
-        //     heading: newHeading,
-        //     desc: newDesc,
-        //     type: newType,
-        //     documentSubItems: newSubItems
-        // };
-
-        const newTempItem = await api.createDocTemplate(
-            {
-                heading: newHeading,
-                desc: newDesc,
-                type: newType,
-                documentSubItems: newSubItems
-            }
-            // toCreate
-        );
-// console.log(newTempItem.newDpc);
-        items = [...items, newTempItem];
+        try {
+            const newTempItem = await api.createDocTemplate(
+                {
+                    heading: newHeading,
+                    desc: newDesc,
+                    type: newType,
+                    documentSubItems: newSubItems
+                }
+            );
+            items = [...items, newTempItem];
+            
+        } catch(e) {
+            console.error('Creating new template failed');
+        }
         addNewItem = false;
-
     }
-    
-    
 
-    // dispatch('finalize-templates', items);
     resetNewItemForm();
     resetFormErrors();
 }
@@ -147,6 +145,7 @@ function resetNewItemForm() {
     newSubItems = [
         {id: Math.floor(Math.random() * 10000), label: ""}
     ];
+    deletedSubItems = [];
 }
 
 function handleNewItem() {
@@ -156,10 +155,10 @@ function handleNewItem() {
 
 function handleNewSubItem() {
     newSubItems = [...newSubItems, {id: Math.floor(Math.random() * 10000), label: ""}];
-    // newSubItems = [...newSubItems, { label: "" }];
 }
 
 function handleRemoveSubItem(index: number) {
+    deletedSubItems.push(newSubItems[index]);
     newSubItems = newSubItems.filter((item, i) => i !== index);
 }
 
@@ -187,14 +186,19 @@ function confirmDeleteItem(itemId:any) {
     confirmDelModal = true;
 }
 
-function handleDeleteItem() {
+async function handleDeleteItem() {
     if (!toDeleteId) {
         return;
     }
-    items = items.filter(e => e.id !== toDeleteId);
-    toDeleteId = null;
-    confirmDelModal = false;
-    // dispatch('finalize-templates', items);
+    console.log(toDeleteId);
+    try {
+        await api.deleteDocTemplate(toDeleteId);
+        items = items.filter(e => e.id !== toDeleteId);
+        toDeleteId = null;
+        confirmDelModal = false;
+    } catch(e) {
+        console.error('Delete failed');
+    }
 }
 
 </script>
