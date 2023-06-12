@@ -27,7 +27,13 @@ const dropTargetClasses = [ 'drop-shadow-xl' ];
 const morphDisabled = true;
 let dragDisabled = true;
 
-$: dragDisabled = items.length === 0;
+$: {
+    if (!adminMode) {
+        dragDisabled = true;
+    } else {
+        dragDisabled = items.length === 0;
+    }
+}
 
 let subItemModal = false;
 let confirmDelModal = false;
@@ -193,6 +199,8 @@ function handleEscape(e) {
 }
 
 async function handleEnterKey(e, item: docItem) {
+    if (!adminMode)
+        return;
     if (e.key !== 'Enter' || (!editItemDesc && !editItemHead)) {
         return;
     }
@@ -207,6 +215,8 @@ async function handleEnterKey(e, item: docItem) {
 }
 
 function inlineEditHeadClick(item: docItem) {
+    if (!adminMode)
+    return;
     if(editItemHead || item.done) {
         return;
     }
@@ -214,6 +224,8 @@ function inlineEditHeadClick(item: docItem) {
 }
 
 function inlineEditDescClick(item: docItem) {
+    if (!adminMode)
+        return;
     if(editItemDesc || item.done) {
         return;
     }
@@ -241,6 +253,9 @@ function checkSubItems(item: docItem, subItem: docItemSubItem) {
 }
 </script>
 <svelte:window on:keydown={handleEscape} />
+
+
+
 <section use:dndzone={{
     items, flipDurationMs, type, dropTargetStyle, dropTargetClasses, morphDisabled, dragDisabled
 }} on:consider={handleSort} on:finalize={handleFinalize}>
@@ -249,18 +264,18 @@ function checkSubItems(item: docItem, subItem: docItemSubItem) {
     <div class="card w-full bg-base-100 shadow-lg mb-4 rounded-lg" class:done={item.done} animate:flip={{duration:flipDurationMs}}>
         <div class="card-body p-4 pl-6">
             <div class="card-title font-medium text-xl flex items-baseline">
-                <span class="w-full" class:cursor-pointer={!item.done}
+                <span class="w-full" class:cursor-pointer={adminMode && !item.done}
                     on:mouseenter={() => showEditHead = item.id}
                     on:mouseleave={() => showEditHead = null}
                     on:click={() => inlineEditHeadClick(item)}
                     on:keyup={(e) => handleEnterKey(e, item)}
                 >
-                    {#if editItemHead === item.id}
+                    {#if adminMode && editItemHead === item.id}
                         <input type="text" bind:value="{item.heading}" class="input input-md input-bordered w-[90%] rounded-md" />
                     {:else}
                         <span>{item.heading}</span>
                     {/if}
-                    {#if showEditHead === item.id && editItemHead !== item.id}
+                    {#if adminMode && showEditHead === item.id && editItemHead !== item.id}
                         <span class="inline-block h-4 text-[#CCD2E3] pl-2"><FaPen /></span>
                     {/if}
                 </span>    
@@ -268,18 +283,18 @@ function checkSubItems(item: docItem, subItem: docItemSubItem) {
                     <span>{item.type === 'reservation' ? '!' : '?'}</span>
                 </div>
             </div>
-            <div class:cursor-pointer={!item.done}
+            <div class:cursor-pointer={adminMode && !item.done}
                 on:mouseenter={() => showEditDesc = item.id}  
                 on:mouseleave={() => showEditDesc = null}
                 on:click={() => inlineEditDescClick(item)}
                 on:keyup={(e) => handleEnterKey(e, item)}
             >
-            {#if editItemDesc === item.id}
+            {#if adminMode && editItemDesc === item.id}
                 <textarea bind:value={item.desc} class="textarea textarea-bordered w-full h-[5rem] rounded-md"></textarea>
             {:else}
                 <p class="text-[#787878] text-lg">
                     {item.desc ?? ''}
-                {#if showEditDesc === item.id && editItemDesc !== item.id}
+                {#if adminMode && showEditDesc === item.id && editItemDesc !== item.id}
                 <span class="inline-block h-4 text-[#CCD2E3] pl-2"><FaPen /></span>
                 {/if}
                 </p>

@@ -2,12 +2,12 @@
 import type { docItem } from "$lib/interfaces/docItem";
 import type { caseItem } from "$lib/interfaces/caseItem";
 import DragToList from "$lib/components/drag-to-list.svelte";
-import {tempdb} from '$lib/temp/tempdb';
     
 export let data;
-let cases: Array<caseItem> = tempdb.get() ?? [];
-let caseItem: caseItem|undefined = cases.find((item) => item.case_number == data.case_num);
-let docItems: Array<docItem> = caseItem?.doc_itmes ?? [];
+
+console.log(data);
+let caseItem: caseItem = data.case_item;
+let docItems: Array<docItem> = caseItem.documents ?? [];
 
 </script>
 
@@ -16,15 +16,15 @@ let docItems: Array<docItem> = caseItem?.doc_itmes ?? [];
     <div class="card-body p-8 pl-6">
         <div class="flex flex-row text-black">
           <div class="w-1/2">
-            <p class="pb-2">Case Number: {caseItem?.case_number}</p>
-            <p class="pb-2">Address: {caseItem?.address}</p>
+            <p class="pb-2">Case Number: {caseItem.caseNumber}</p>
+            <p class="pb-2">Address: {caseItem.address}</p>
             <p>Last Update: 27/04/2023</p> 
           </div>
         </div>
     </div>
   </div>
 
-  <DragToList items={docItems} />
+  <DragToList items={docItems} caseId={caseItem.id} />
 </section>
 
 <style lang="postcss">

@@ -1,10 +1,8 @@
-// import type { caseItem } from '$lib/interfaces/caseItem';
-import { redirect, json } from '@sveltejs/kit';
-import type { PageServerLoad, Actions } from './$types';
+import { redirect } from '@sveltejs/kit';
+import type { PageServerLoad } from './$types';
 import { prisma } from '$lib/server/prisma';
 import type { Case } from '@prisma/client';
 import type { caseItem } from '$lib/interfaces/caseItem';
-import type { docItem } from '$lib/interfaces/docItem';
 
 export const load: PageServerLoad = (async ({ parent, params }) => {
     const parentData = await parent();
@@ -27,7 +25,6 @@ export const load: PageServerLoad = (async ({ parent, params }) => {
 
     return { 
         caseItem: caseFound.pop(),
-        templates: templates,
-        case_num: params.case_num //TODO: REMOVE THIS
+        templates: templates
     };
 });

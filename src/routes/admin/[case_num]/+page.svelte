@@ -4,13 +4,11 @@ import type { docItem } from "$lib/interfaces/docItem";
 import DragFromList from "$lib/components/drag-from-list.svelte";
 import DragToList from "$lib/components/drag-to-list.svelte";
 import type { caseItem, createdUpdatedFields } from "$lib/interfaces/caseItem";
-import {tempdb, templatedb} from '$lib/temp/tempdb';
 import {api} from '$lib/api';
     
 export let data;
 
-let cases: Array<caseItem> = tempdb.get() ?? [];
-let caseItem: (caseItem & createdUpdatedFields)|undefined = data.caseItem;// |undefined = cases.find((item) => item.case_number == data.case_num);
+let caseItem: (caseItem & createdUpdatedFields)|undefined = data.caseItem;
 let searchStr: string = '';
 
 onMount(() => {
@@ -21,7 +19,7 @@ onMount(() => {
 
 const templateItems: Array<docItem> = data.templates;
 
-let commonDocItems = [...templateItems];//: Array<docItem> = data.templates;//templatedb.get() ?? [];
+let commonDocItems = [...templateItems];
 
 let docItems: Array<docItem> = caseItem?.documents ?? [];
 
@@ -61,7 +59,7 @@ async function filterItems() {
               <p>Last Update: {caseItem?.lastUpdate ? caseItem.lastUpdate.toLocaleDateString('da-DK', {dateStyle: "medium"}) : ''}</p>
             </div>
             <div class="w-1/2">
-              <p>Public URL: www.domain.reservationer.dk/{data.case_num}</p>
+              <p>Public URL: www.domain.reservationer.dk/{caseItem?.caseNumber}</p>
             </div>
           </div>
       </div>

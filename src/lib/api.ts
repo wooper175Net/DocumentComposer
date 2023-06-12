@@ -4,6 +4,7 @@ import type { docItemSubItem } from "$lib/interfaces/docItemSubItem";
 
 class Api {
     private apiUrl = '/api';
+    private publicApiUrl = '/papi';
 
     async updateCaseDocs(caseItem:caseItem, newDocList: Array<docItem>) {
         return this.sendApiRequest('update-docs', { caseItem, newDocList });
@@ -14,7 +15,7 @@ class Api {
     }
 
     async toggleDoc(docId: number, done: boolean) {
-        return this.sendApiRequest('toggle-doc', { docId, done });
+        return this.sendApiRequest('toggle-doc', { docId, done }, this.publicApiUrl);
     }
 
     async addSubItem(docId: number, subItem: docItemSubItem) {
@@ -26,7 +27,7 @@ class Api {
     }
 
     async toggleSubItem(subItemId: number, checked: boolean) {
-        return this.sendApiRequest('toggle-sub-item', { subItemId, checked });
+        return this.sendApiRequest('toggle-sub-item', { subItemId, checked }, this.publicApiUrl);
     }
 
     async createDocTemplate(docTemplateItem: docItem) {
@@ -45,8 +46,8 @@ class Api {
         return this.sendApiRequest('update-doc', { updatedItem });
     }
 
-    private async sendApiRequest(endpoint: string, postObj: Object) {
-        let response = await fetch(`${this.apiUrl}/${endpoint}`, {method:'POST', body: JSON.stringify( postObj )});
+    private async sendApiRequest(endpoint: string, postObj: Object, apiUrl: string = this.apiUrl) {
+        let response = await fetch(`${apiUrl}/${endpoint}`, {method:'POST', body: JSON.stringify( postObj )});
 
         if (!response.ok) {
             throw new Error("Operation failed")
