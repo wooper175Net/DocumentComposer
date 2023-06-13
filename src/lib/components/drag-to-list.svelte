@@ -11,9 +11,12 @@ import IconFolderDel from "$lib/components/icons/icon-folder-del.svelte";
 import IconCircleDblCheck from "$lib/components/icons/icon-circle-dbl-check.svelte";
 import IconCircleDblCheckStrout from "$lib/components/icons/icon-circle-dbl-check-strout.svelte";
 import IconCirleDel from "$lib/components/icons/icon-cirle-del.svelte";
+import DocTypeIcon from "./doc-type-icon.svelte";
 import FaPen from 'svelte-icons/fa/FaPen.svelte'
 import { createEventDispatcher } from 'svelte';
 import { api } from "$lib/api";
+import {CaseStatus} from "$lib/enums/CaseStatus"
+import {DocType} from "$lib/enums/DocType"
 
 const dispatch = createEventDispatcher();
 
@@ -163,17 +166,24 @@ async function checkItemDone() {
     if (!caseId) {
         return;
     }
+
+    const isDone = confirmDoneModal;
     try {
-        await api.toggleDoc(tempDocItem.id, confirmDoneModal);
+        await api.toggleDoc(tempDocItem.id, isDone);
     
         let itemToCheck = tempDocItem;
         items = items.map((item) => {
             if (item.id === itemToCheck.id) {
-                item.done = confirmDoneModal;
-                item.documentSubItems?.forEach((subItem) => subItem.checked = confirmDoneModal);
+                item.done = isDone;
+                item.documentSubItems?.forEach((subItem) => subItem.checked = isDone);
             }
             return item;
         });
+
+        const status = isDone ? CaseStatus.DONE : CaseStatus.PENDING;
+        
+        await api.toggleCaseStatus(caseId, status);
+        
     } catch(e) {
         console.error("Updating item failed");
     }
@@ -251,7 +261,11 @@ function checkSubItems(item: docItem, subItem: docItemSubItem) {
         console.error('Changing sub-item failed');
     }
 }
+
+
 </script>
+
+
 <svelte:window on:keydown={handleEscape} />
 
 
@@ -279,9 +293,7 @@ function checkSubItems(item: docItem, subItem: docItemSubItem) {
                         <span class="inline-block h-4 text-[#CCD2E3] pl-2"><FaPen /></span>
                     {/if}
                 </span>    
-                <div class="head-icon ml-auto" class:red-icon={item.type === 'reservation'} class:green-icon={item.type === 'question'}>
-                    <span>{item.type === 'reservation' ? '!' : '?'}</span>
-                </div>
+                <DocTypeIcon type={item.type} />
             </div>
             <div class:cursor-pointer={adminMode && !item.done}
                 on:mouseenter={() => showEditDesc = item.id}  

@@ -42,6 +42,13 @@ body {
     @apply text-[#59FF60];
 }
 
+.blue-icon {
+    @apply bg-[#E7E9FF] border border-[#4356FF];
+}
+.blue-icon span {
+    @apply text-[#4356FF];
+}
+
 /* Forms */
 .form-control {
     @apply mb-3 font-light;

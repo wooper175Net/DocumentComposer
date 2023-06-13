@@ -5,6 +5,8 @@ import DragFromList from "$lib/components/drag-from-list.svelte";
 import DragToList from "$lib/components/drag-to-list.svelte";
 import type { caseItem, createdUpdatedFields } from "$lib/interfaces/caseItem";
 import {api} from '$lib/api';
+
+import { page } from '$app/stores';
     
 export let data;
 
@@ -59,7 +61,7 @@ async function filterItems() {
               <p>Last Update: {caseItem?.lastUpdate ? caseItem.lastUpdate.toLocaleDateString('da-DK', {dateStyle: "medium"}) : ''}</p>
             </div>
             <div class="w-1/2">
-              <p>Public URL: www.domain.reservationer.dk/{caseItem?.caseNumber}</p>
+              <p>Public URL: <a href="{$page.url.origin}/{caseItem?.caseNumber}">{$page.url.origin}/{caseItem?.caseNumber}</a></p>
             </div>
           </div>
       </div>

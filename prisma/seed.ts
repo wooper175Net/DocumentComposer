@@ -1,6 +1,8 @@
 import { PrismaClient, Prisma } from '@prisma/client'
 import bcrypt from 'bcrypt'
 import {randomUUID} from 'crypto'
+import {CaseStatus} from "../src/lib/enums/CaseStatus"
+import {DocType} from "../src/lib/enums/DocType"
 
 const prisma = new PrismaClient()
 
@@ -30,7 +32,7 @@ const userData: Prisma.UserCreateInput[] = [
 
 const caseData = [
   {
-    status: 'new',
+    status: CaseStatus.NEW,
     caseNumber: '812345',
     address: 'Sofia, str. Valdayska 12',
     createdBy: 1,
@@ -38,7 +40,7 @@ const caseData = [
       create: [
         {
           heading: 'Lorem ipsum dolor sit amet',
-          type: 'reservation',
+          type: DocType.RESERVATION,
           desc: 'Nunc arcu erat, dapibus quis ornare sit amet, ornare efficitur lorem.',
           documentSubItems: {
             create: [
@@ -55,7 +57,7 @@ const caseData = [
         },
         {
           heading: 'Morbi hendrerit erat at vehicula cursus',
-          type: 'question',
+          type: DocType.QUESTION,
           desc: 'Lorem ipsum dolor sit amet',
           documentSubItems: {
             create: [
@@ -77,18 +79,18 @@ const caseData = [
 
 const templateData = [
   {
-    type: 'reservation',
-    heading: 'Morbi hendrerit erat at vehicula cursus',
+    type: DocType.INFO,
+    heading: 'Info Morbi hendrerit erat at vehicula cursus',
     desc: 'Lorem ipsum dolor sit amet'
   },
   {
-    type: 'question',
-    heading: 'Lorem ipsum dolor sit amet',
+    type: DocType.QUESTION,
+    heading: 'Question Lorem ipsum dolor sit amet',
     desc: 'Nunc arcu erat, dapibus quis ornare sit amet, ornare efficitur lorem.'
   },
   {
-    type: 'reservation',
-    heading: 'Quisque sit amet euismod magna'
+    type: DocType.RESERVATION,
+    heading: 'Reservation Quisque sit amet euismod magna'
   }
 ]
 

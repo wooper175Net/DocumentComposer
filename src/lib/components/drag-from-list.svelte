@@ -43,12 +43,15 @@ let formErrors = {
 let shouldIgnoreDndEvents:boolean = false;
 let confirmDelModal:boolean = false;
 let toDeleteId:string;
+let restoreId: [number, number] = [];
 
 function handleOnConsider(e) {
     const {trigger, id} = e.detail.info;
     if (trigger === TRIGGERS.DRAG_STARTED) {
         const idx = items.findIndex(item => item.id === id);
-        const newId = Math.round(Math.random()*10000);//`${id}_copy_${Math.round(Math.random()*10000)}`; 
+        //Keep the real id to restore in handleFinalize
+        restoreId = [idx, id];
+        const newId = Math.round(Math.random()*10000); 
         e.detail.items = e.detail.items.filter(item => !item[SHADOW_ITEM_MARKER_PROPERTY_NAME]);
         e.detail.items.splice(idx, 0, {...items[idx], id: newId});
         items = e.detail.items;
@@ -70,6 +73,11 @@ function handleFinalize(e) {
         items = [...items];
         shouldIgnoreDndEvents = false;
     }
+    const [index, realId] = restoreId
+    if (index && realId) {
+        items[index].id = realId;
+    }
+
     dispatch('finalize-templates', items); //not needed for rearranging
 }
 
@@ -260,6 +268,7 @@ async function handleDeleteItem() {
             <select bind:value={newType} class="select select-sm select-bordered w-full max-w-xs rounded-md h-10 text-lg font-light">
                 <option value="reservation">Reservation</option>
                 <option value="question">Question</option>
+                <option value="question">Information</option>
             </select>
         </div>
         <div class="form-control w-full">
