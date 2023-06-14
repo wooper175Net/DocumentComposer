@@ -1,20 +1,14 @@
 <script>
-	import { onMount, getContext } from 'svelte';
-	import { key } from './menu.js';
-	
 	export let isDisabled = false;
 	export let text = '';
 	
 	import { createEventDispatcher } from 'svelte';
 	const dispatch = createEventDispatcher();	
 	
-	const { dispatchClick } = getContext(key);
-	
-	const handleClick = e => {
+	const handleClick = () => {
 		if (isDisabled) return;
 		
 		dispatch('click');
-		dispatchClick();
 	}
 </script>
 
