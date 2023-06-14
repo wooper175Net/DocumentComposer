@@ -12,6 +12,7 @@ import MenuOption from '$lib/components/context-menu/MenuOption.svelte';
 import FaPen from 'svelte-icons/fa/FaPen.svelte';
 import FaTrashAlt from 'svelte-icons/fa/FaTrashAlt.svelte';
 import { api } from "$lib/api";
+import { DocType } from "$lib/enums/DocType";
 
 const dispatch = createEventDispatcher();
 
@@ -266,9 +267,9 @@ async function handleDeleteItem() {
               <span>Type</span>
             </label>
             <select bind:value={newType} class="select select-sm select-bordered w-full max-w-xs rounded-md h-10 text-lg font-light">
-                <option value="reservation">Reservation</option>
-                <option value="question">Question</option>
-                <option value="question">Information</option>
+                <option value="{DocType.RESERVATION}">Reservation</option>
+                <option value="{DocType.QUESTION}">Question</option>
+                <option value="{DocType.INFO}">Information</option>
             </select>
         </div>
         <div class="form-control w-full">
