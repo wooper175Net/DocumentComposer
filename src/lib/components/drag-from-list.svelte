@@ -79,7 +79,7 @@ function handleFinalize(e) {
         items[index].id = realId;
     }
 
-    dispatch('finalize-templates', items); //not needed for rearranging
+    dispatch('finalize-templates', items); 
 }
 
 function validateNewTemplate() {
@@ -128,7 +128,7 @@ async function saveNewTemplate() {
                     documentSubItems: newSubItems
                 }
             );
-            items = [...items, newTempItem];
+            items = [newTempItem, ...items];
             
         } catch(e) {
             console.error('Creating new template failed');
@@ -138,6 +138,8 @@ async function saveNewTemplate() {
 
     resetNewItemForm();
     resetFormErrors();
+
+    dispatch('finalize-templates', items);
 }
 
 function resetFormErrors() {
@@ -208,6 +210,8 @@ async function handleDeleteItem() {
     } catch(e) {
         console.error('Delete failed');
     }
+
+    dispatch('finalize-templates', items);
 }
 
 </script>
@@ -219,7 +223,7 @@ async function handleDeleteItem() {
         <li animate:flip={{duration:flipDurationMs}}>
             <div>{item.heading}</div>
             <div class="w-6 ml-auto">
-                <CustomMenu >
+                <CustomMenu>
                     <MenuOption on:click={() => handleEditItem(item)}>
                     <span class="text-[#CCD2E3] hover:text-black">
                         <span class="inline-block h-4  pl-2 mr-2"><FaPen /></span>

@@ -19,7 +19,7 @@ onMount(() => {
   }
 });
 
-const templateItems: Array<docItem> = data.templates;
+let templateItems: Array<docItem> = data.templates;
 
 let commonDocItems = [...templateItems];
 
@@ -41,6 +41,8 @@ async function handleDocDrag(e: any) {
 }
 
 function handleFinalizeTemplates(e:any) {
+  console.log('finalize templates', e.detail);
+  templateItems = [...e.detail];
 }
 
 async function filterItems() {

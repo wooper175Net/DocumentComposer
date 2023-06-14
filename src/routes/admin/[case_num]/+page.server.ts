@@ -16,6 +16,7 @@ export const load: PageServerLoad = (async ({ parent, params }) => {
     }
 
     const templates = prisma.templateDocument.findMany({
+        orderBy: { id: 'desc'},
         include: {
             documentSubItems: {
                 orderBy: { id: 'asc'}
