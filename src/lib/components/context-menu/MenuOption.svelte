@@ -1,6 +1,7 @@
 <script>
 	export let isDisabled = false;
 	export let text = '';
+	export let cssClasses = '';
 	
 	import { createEventDispatcher } from 'svelte';
 	const dispatch = createEventDispatcher();	
@@ -14,7 +15,6 @@
 
 <style>
 	div {
-		padding: 4px 5px;
 		cursor: default;
 		font-size: 14px;
 		display: flex;
@@ -32,7 +32,7 @@
 	}
 </style>
 
-<div 
+<div class="{cssClasses}"
   class:disabled={isDisabled}
   on:click={handleClick}
 >

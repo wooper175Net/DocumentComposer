@@ -1,7 +1,7 @@
 import type { LayoutServerLoad } from './$types';
 import { prisma } from '$lib/server/prisma';
 
-export const load = (async ({ params }) => {
+export const load = (async ({ params, locals }) => {
     
     const caseItem = await prisma.case.findFirst({
         where: {
@@ -21,7 +21,8 @@ export const load = (async ({ params }) => {
 
     return { 
         case_item: caseItem,
-        case_num: params.case_num 
+        case_num: params.case_num,
+        user: locals.user
     };
 }) satisfies LayoutServerLoad;
 

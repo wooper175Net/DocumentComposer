@@ -224,13 +224,13 @@ async function handleDeleteItem() {
             <div>{item.heading}</div>
             <div class="w-6 ml-auto">
                 <CustomMenu>
-                    <MenuOption on:click={() => handleEditItem(item)}>
+                    <MenuOption on:click={() => handleEditItem(item)} cssClasses={"p-2"}>
                     <span class="text-[#CCD2E3] hover:text-black">
                         <span class="inline-block h-4  pl-2 mr-2"><FaPen /></span>
                         <span class="text-black">Edit</span>
                     </span>
                     </MenuOption>
-                    <MenuOption on:click={() => confirmDeleteItem(item.id)}>
+                    <MenuOption on:click={() => confirmDeleteItem(item.id)} cssClasses={"p-2"}>
                     <span class="text-[#CCD2E3] hover:text-black">
                         <span class="inline-block h-4  pl-2 mr-2"><FaTrashAlt /></span>
                         <span class="text-black">Delete</span>

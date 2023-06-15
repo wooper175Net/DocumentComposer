@@ -6,6 +6,8 @@
 	export let x: number;
 	export let y: number;
 	export let width: number;
+
+	export let cssClasses: string = '';
 	
 	// whenever x and y is changed, restrict box to be within bounds
 	$: (() => {
@@ -37,7 +39,7 @@
 
 <svelte:body on:click={onPageClick} />
 
-<div transition:fade={{ duration: 100 }} bind:this={menuEl} class="rounded" style="top: {y}px; left: {x}px; width:{width}px;">
+<div transition:fade={{ duration: 100 }} bind:this={menuEl} class="rounded {cssClasses}" style="top: {y}px; left: {x}px; width:{width}px;">
 	<slot />
 </div>
 
