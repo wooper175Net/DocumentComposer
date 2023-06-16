@@ -438,7 +438,6 @@ function checkSubItems(item: docItem, subItem: docItemSubItem) {
     </PopupWrapper>
 {/if}
 
-
 <style lang="postcss">
 .chckbox-list li label {
     @apply label cursor-pointer justify-start;
