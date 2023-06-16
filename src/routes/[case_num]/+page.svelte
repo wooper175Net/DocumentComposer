@@ -6,7 +6,6 @@ import ProfileMenu from "$lib/components/context-menu/ProfileMenu.svelte";
     
 export let data;
 
-console.log(data);
 let caseItem: caseItem = data.case_item;
 let docItems: Array<docItem> = caseItem.documents ?? [];
 

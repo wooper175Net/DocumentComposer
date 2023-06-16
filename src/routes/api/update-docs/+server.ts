@@ -4,7 +4,6 @@ import type { caseItem } from '$lib/interfaces/caseItem';
 import type { docItem } from '$lib/interfaces/docItem';
 import { prisma } from '$lib/server/prisma';
 import type { docItemSubItem } from '$lib/interfaces/docItemSubItem';
-import { randomUUID } from 'crypto';
 
 export const POST: RequestHandler = async ({ request }) => {
 
@@ -16,14 +15,12 @@ export const POST: RequestHandler = async ({ request }) => {
     for (const e of newDocList) {
        
         if (!e.sequence) { //new documents don't have sequence number set
-            // console.log(e);
             let newSubItems: Array<docItemSubItem> = [];
             if (e.documentSubItems) {
 
                 for (let subItem of e.documentSubItems) {
                     newSubItems = [...newSubItems, {label: subItem.label, type: subItem.type}];
                 }
-                console.log(newSubItems);
             }
             await prisma.document.create({
                 data: {

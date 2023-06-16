@@ -50,6 +50,10 @@ class Api {
         return this.sendApiRequest('toggle-case-status', { caseId, status }, this.publicApiUrl);
     }
 
+    async updateCase(updatedItem: caseItem) {
+        return this.sendApiRequest('update-case', { updatedItem });
+    }
+
     private async sendApiRequest(endpoint: string, postObj: Object, apiUrl: string = this.apiUrl) {
         let response = await fetch(`${apiUrl}/${endpoint}`, {method:'POST', body: JSON.stringify( postObj )});
 

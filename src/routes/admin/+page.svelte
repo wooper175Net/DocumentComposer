@@ -117,10 +117,21 @@ $: {
   {#each casesTmp as caseItem (caseItem.caseNumber)}
     <a href="/admin/{caseItem.caseNumber}" in:fly animate:flip={{duration:600}} 
       class="block card bg-white w-full rounded-md py-6 px-5 drop-shadow-md flex flex-row items-center text-lg font-light mb-3">
-      <div class="w-1/5">{caseItem.caseNumber}</div>
-      <div class="w-5/6">{caseItem.address}</div>
+      <div class="w-1/6">{caseItem.caseNumber}</div>
+      <div class="w-3/6">{caseItem.address}</div>
+      <div class="w-1/5">
+        <div 
+        class="rounded h-6 w-24 text-xs font-bold justify-center items-center flex border"
+        class:bg-[#6573F1]={caseItem?.published} class:border-[#0013BC]={caseItem?.published} 
+        class:bg-[#ECECEC]={!caseItem?.published} class:border-[#B0B0B0]={!caseItem?.published}
+        class:text-white={caseItem?.published}
+        class:text-black={!caseItem?.published}
+        >
+        { caseItem?.published ? "Published" : "Draft"}
+        </div>
+      </div>
       <button on:click|preventDefault={() => {confirmationModal = true; selectedCase = caseItem; }}
-      class="text-[#9a9a9a] hover:text-black h-5 w-5 justify-end">
+      class="text-[#9a9a9a] hover:text-black h-5 w-5 justify-end ml-auto">
         <FaRegTrashAlt />
       </button>
     </a>

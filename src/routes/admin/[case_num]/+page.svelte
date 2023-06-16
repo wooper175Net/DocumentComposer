@@ -5,12 +5,12 @@ import DragFromList from "$lib/components/drag-from-list.svelte";
 import DragToList from "$lib/components/drag-to-list.svelte";
 import type { caseItem, createdUpdatedFields } from "$lib/interfaces/caseItem";
 import {api} from '$lib/api';
-
 import { page } from '$app/stores';
+import IoIosArrowDown from 'svelte-icons/io/IoIosArrowDown.svelte'
     
 export let data;
 
-let caseItem: (caseItem & createdUpdatedFields)|undefined = data.caseItem;
+let caseItem: (caseItem & createdUpdatedFields)|undefined|null = data.caseItem;
 let searchStr: string = '';
 
 onMount(() => {
@@ -50,6 +50,17 @@ async function filterItems() {
   commonDocItems = templateItems.filter((item) => item.heading.search( new RegExp(searchStr, 'i')) > -1 );
 }
 
+let publishedBtn: HTMLDetailsElement;
+async function togglePublished() {
+  try {
+      caseItem.published = !caseItem.published;
+      await api.updateCase(caseItem);
+      publishedBtn.open = false;
+  } catch(e) {
+      console.error("Update failed");
+  }
+}
+
 </script>
 
 <section class="grid grid-cols-12 w-full h-full">
@@ -64,6 +75,22 @@ async function filterItems() {
             </div>
             <div class="w-1/2">
               <p>Public URL: <a href="{$page.url.origin}/{caseItem?.caseNumber}">{$page.url.origin}/{caseItem?.caseNumber}</a></p>
+              <details class="dropdown mt-4" bind:this={publishedBtn}>
+                <summary class="btn btn-sm hover:text-white font-normal w-36 flex flex-row border" 
+                  class:bg-[#6573F1]={caseItem?.published} class:border-[#0013BC]={caseItem?.published}
+                  class:bg-[#ECECEC]={!caseItem?.published} class:border-[#B0B0B0]={!caseItem?.published}
+                  class:text-white={caseItem?.published}
+                  class:text-black={!caseItem?.published}
+                >
+                  { caseItem?.published ? "Published" : "Draft"}
+                  <div class="h-4 w-4 ml-auto">
+                    <IoIosArrowDown />
+                  </div>
+                </summary>
+                <ul class="border menu dropdown-content bg-base-100 w-52">
+                  <li><button on:click={togglePublished}>{ caseItem?.published ? "Draft" : "Published"}</button></li>
+                </ul>
+              </details>
             </div>
           </div>
       </div>

@@ -1,11 +1,13 @@
 import type { LayoutServerLoad } from './$types';
 import { prisma } from '$lib/server/prisma';
+import { error } from '@sveltejs/kit';
 
 export const load = (async ({ params, locals }) => {
     
     const caseItem = await prisma.case.findFirst({
         where: {
-            caseNumber: params.case_num
+            caseNumber: params.case_num,
+            published: true
         },
         include: {
             documents: {
@@ -18,6 +20,12 @@ export const load = (async ({ params, locals }) => {
             }
         }
     });
+
+    if (!caseItem) {
+        throw error(404, {
+            message: 'Not found'
+        }); 
+    }
 
     return { 
         case_item: caseItem,

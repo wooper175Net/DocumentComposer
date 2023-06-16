@@ -5,6 +5,7 @@ interface caseItem {
     status: 'new'|'pending'|'done'
     caseNumber: string;
     address: string;
+    published: boolean;
     documents: Array<docItem>;
     createdBy?: number;
 }

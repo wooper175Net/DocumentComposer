@@ -26,6 +26,7 @@ model Case {
   status     String
   caseNumber String   @unique
   address    String
+  published  Boolean  @default(false)
   createdBy  Int
   createdAt  DateTime @default(now())
   lastUpdate DateTime @updatedAt
