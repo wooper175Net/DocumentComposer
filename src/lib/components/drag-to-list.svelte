@@ -11,12 +11,14 @@ import IconFolderDel from "$lib/components/icons/icon-folder-del.svelte";
 import IconCircleDblCheck from "$lib/components/icons/icon-circle-dbl-check.svelte";
 import IconCircleDblCheckStrout from "$lib/components/icons/icon-circle-dbl-check-strout.svelte";
 import IconCirleDel from "$lib/components/icons/icon-cirle-del.svelte";
+import IconText from "$lib/components/icons/icon-text.svelte";
+import IoIosCheckboxOutline from 'svelte-icons/io/IoIosCheckboxOutline.svelte';
 import DocTypeIcon from "./doc-type-icon.svelte";
 import FaPen from 'svelte-icons/fa/FaPen.svelte'
 import { createEventDispatcher } from 'svelte';
 import { api } from "$lib/api";
-import {CaseStatus} from "$lib/enums/CaseStatus"
-import {DocType} from "$lib/enums/DocType"
+import { SubItemType } from "$lib/enums/SubItemType";
+import {CaseStatus} from "$lib/enums/CaseStatus";
 
 const dispatch = createEventDispatcher();
 
@@ -39,6 +41,8 @@ $: {
 }
 
 let subItemModal = false;
+let subItemType: string;
+
 let confirmDelModal = false;
 let confirmDoneModal = false;
 let confirmUndoneModal = false;
@@ -107,8 +111,15 @@ const deleteDocSubItem = async function() {
     confirmDelModal = false;
 }
 
-function addDocSubItem(item: docItem) {
+function addTodoSubItem(item: docItem) {
     subItemModal = true;
+    subItemType = SubItemType.TODO;
+    tempDocItem = item;
+}
+
+function addTextSubItem(item: docItem) {
+    subItemModal = true;
+    subItemType = SubItemType.TEXT;
     tempDocItem = item;
 }
 
@@ -119,8 +130,14 @@ async function saveDocSubItem() {
         newSubItemError = true;
         return;
     }
+
+    const newSubItemObj: docItemSubItem = {
+        label: newSubItemTitle,
+        type: subItemType
+    };
+    
     try {
-        const newSubItem = await api.addSubItem(tempDocItem.id, {label: newSubItemTitle});
+        const newSubItem = await api.addSubItem(tempDocItem.id, newSubItemObj);
 
         if (!tempDocItem.documentSubItems) {
             tempDocItem.documentSubItems = [];
@@ -175,7 +192,13 @@ async function checkItemDone() {
         items = items.map((item) => {
             if (item.id === itemToCheck.id) {
                 item.done = isDone;
-                item.documentSubItems?.forEach((subItem) => subItem.checked = isDone);
+                item.documentSubItems?.forEach(
+                 (subItem) => {
+                    if (subItem.type === SubItemType.TODO) {
+                        subItem.checked = isDone;
+                    }
+                 }
+                )
             }
             return item;
         });
@@ -253,7 +276,7 @@ function checkSubItems(item: docItem, subItem: docItemSubItem) {
     try {
         api.toggleSubItem(subItem.id, subItem.checked);
 
-        const unchecked: Array<docItemSubItem> = item.documentSubItems?.filter(e => !e.checked);
+        const unchecked: Array<docItemSubItem> = item.documentSubItems?.filter(e => e.type === SubItemType.TODO && !e.checked);
         if (unchecked.length === 0) {
             confirmDoneModal = true;
         }
@@ -321,7 +344,9 @@ function checkSubItems(item: docItem, subItem: docItemSubItem) {
             <ul class="chckbox-list my-6">
                 {#each item.documentSubItems as sub_item(sub_item.id)}
                 <li class="flex items-center"><label class="w-[90%]">
-                    <input type="checkbox" bind:checked={sub_item.checked} disabled={item.done} on:change={() => checkSubItems(item, sub_item)} />
+                    {#if sub_item.type === SubItemType.TODO}
+                     <input type="checkbox" bind:checked={sub_item.checked} disabled={item.done} on:change={() => checkSubItems(item, sub_item)} />
+                    {/if}
                     <span>{sub_item.label}</span>
                     </label>
                     {#if adminMode && !item.done}
@@ -335,12 +360,26 @@ function checkSubItems(item: docItem, subItem: docItemSubItem) {
             {/if}
             {#if adminMode && !item.done}
             <div class="flex">
-                <button on:click={()=> addDocSubItem(item) } data-tip="Add new sub-item"
-                class="tooltip w-10 h-10 border border-2 border-[#CCD2E3] mx-auto rounded-full text-[#CCD2E3] flex hover:border-black hover:text-black">
-                    <span class="inline-block text-center w-10 my-auto text-2xl">+</span>
-                </button>
+                <div class="group w-10 h-10 border border-2 border-[#CCD2E3] mx-auto rounded-full text-[#CCD2E3] 
+                flex hover:w-24 justify-center items-center cursor-pointer hover:animate-jump hover:animate-delay-100 hover:animate-duration-200"
+                >
+                    <span class="inline-block text-center w-10 my-auto text-2xl group-hover:hidden">+</span>
+
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <span class="hidden group-hover:inline-block w-12 h-8 hover:text-black tooltip"
+                    data-tip="Add new to-do"
+                    on:click={()=> addTodoSubItem(item) } 
+                    >
+                        <IoIosCheckboxOutline  />
+                    </span>
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <span class="hidden group-hover:inline-block tooltip" 
+                    data-tip="Add new text"
+                    on:click={() => addTextSubItem(item)} >
+                        <IconText class="fill-[#CCD2E3] h-[1.3rem] w-12 m-auto hover:fill-black" />
+                    </span>
+                </div>
             </div>
-            
             <div class="flex justify-end h-6 gap-2">
                 <button on:click={() => confirmDocItemToDel(item) } class="tooltip" data-tip="Delete item">
                     <IconFolderDel class="stroke-[#cecece] w-6 h-6 hover:stroke-black " />
@@ -366,7 +405,9 @@ function checkSubItems(item: docItem, subItem: docItemSubItem) {
 </section>
 {#if subItemModal}
     <PopupWrapper on:close={() => subItemModal = false} clickOutsideClose={false} >
-        <h3 class=" font-normal text-lg">Add Sub Item</h3>
+        <h3 class=" font-normal text-lg">
+            {#if subItemType === SubItemType.TEXT} Add Text Sub Item {:else} Add To-do Sub Item {/if}
+        </h3>
         <div class="flex py-2 w-[500px]">
             <input type="text" class="input input-sm input-bordered w-2/3 rounded-sm" class:border-red-600={newSubItemError} bind:value={newSubItemTitle} />
             <button class="btn btn-sm btn-outline w-1/6 ml-2 normal-case" on:click={saveDocSubItem}>Add</button>

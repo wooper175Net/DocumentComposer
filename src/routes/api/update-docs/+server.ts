@@ -21,7 +21,7 @@ export const POST: RequestHandler = async ({ request }) => {
             if (e.documentSubItems) {
 
                 for (let subItem of e.documentSubItems) {
-                    newSubItems = [...newSubItems, {label: subItem.label}];
+                    newSubItems = [...newSubItems, {label: subItem.label, type: subItem.type}];
                 }
                 console.log(newSubItems);
             }

@@ -1,6 +1,7 @@
 import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { prisma } from '$lib/server/prisma';
+import { SubItemType } from '$lib/enums/SubItemType';
 
 export const POST: RequestHandler = async ({ request }) => {
 	const data: {docId: number, done: boolean} = await request.json();
@@ -14,7 +15,8 @@ export const POST: RequestHandler = async ({ request }) => {
             documentSubItems: {
                 updateMany: {
                     where: {
-                        documentId: data.docId
+                        documentId: data.docId,
+                        type: SubItemType.TODO
                     },
                     data: {
                         checked: data.done

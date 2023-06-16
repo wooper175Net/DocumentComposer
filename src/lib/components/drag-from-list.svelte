@@ -13,6 +13,9 @@ import FaPen from 'svelte-icons/fa/FaPen.svelte';
 import FaTrashAlt from 'svelte-icons/fa/FaTrashAlt.svelte';
 import { api } from "$lib/api";
 import { DocType } from "$lib/enums/DocType";
+import { SubItemType } from "$lib/enums/SubItemType";
+import IoIosCheckboxOutline from "svelte-icons/io/IoIosCheckboxOutline.svelte";
+import IconText from "$lib/components/icons/icon-text.svelte";
 
 const dispatch = createEventDispatcher();
 
@@ -30,9 +33,7 @@ let toEditId: string = '';
 let newHeading: string = '';
 let newDesc: string = '';
 let newType: string = 'reservation';
-let newSubItems: Array<docItemSubItem> = [
-    { label: "" }
-];
+let newSubItems: Array<docItemSubItem>;
 let deletedSubItems: Array<docItemSubItem> = [];
 
 let formErrors = {
@@ -154,7 +155,7 @@ function resetNewItemForm() {
     newDesc = '';
     newType = 'reservation';
     newSubItems = [
-        {id: Math.floor(Math.random() * 10000), label: ""}
+        {id: Math.floor(Math.random() * 10000), label: "", checked: false, type: SubItemType.TODO}
     ];
     deletedSubItems = [];
 }
@@ -164,8 +165,15 @@ function handleNewItem() {
     addNewItem = true;
 }
 
-function handleNewSubItem() {
-    newSubItems = [...newSubItems, {id: Math.floor(Math.random() * 10000), label: ""}];
+function handleNewSubItem(subItemType: SubItemType) {
+    const newSubItem = {
+        id: Math.floor(Math.random() * 10000),
+        label: "",
+        type: subItemType,
+        checked: subItemType === SubItemType.TODO ? false : null
+    };
+
+    newSubItems = [...newSubItems, newSubItem];
 }
 
 function handleRemoveSubItem(index: number) {
@@ -282,6 +290,13 @@ async function handleDeleteItem() {
             </label>
             {#each newSubItems as subItem, index}
                 <div class="flex items-center mb-4">
+                    {#if subItem.type === SubItemType.TODO}
+                    <span class="w-8 h-8 text-[#CCD2E3]">
+                        <IoIosCheckboxOutline  />
+                    </span>
+                    {:else}
+                        <IconText class="fill-[#CCD2E3] h-6 w-8" />
+                    {/if}
                     <input type="text" bind:value={subItem.label} class="field w-[90%]" />
                     <button class="w-6 ml-auto" on:click={() => handleRemoveSubItem(index)}>
                         <IconCirleDel class="h-6 w-6 stroke-[#CCD2E3] hover:stroke-black " />
@@ -290,10 +305,25 @@ async function handleDeleteItem() {
             {/each}
         </div>
         <div class="flex mb-2">
-            <button on:click={handleNewSubItem}
-            class="w-10 h-10 border border-2 border-[#CCD2E3] mx-auto rounded-full text-[#CCD2E3] flex hover:border-black hover:text-black">
-                <span class="inline-block text-center w-10 my-auto text-2xl">+</span>
-            </button>
+            <div class="group w-10 h-10 border border-2 border-[#CCD2E3] mx-auto rounded-full text-[#CCD2E3] 
+                flex hover:w-24 justify-center items-center cursor-pointer hover:animate-jump hover:animate-delay-100 hover:animate-duration-200"
+                >
+                    <span class="inline-block text-center w-10 my-auto text-2xl group-hover:hidden">+</span>
+
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <span class="hidden group-hover:inline-block w-12 h-8 hover:text-black tooltip"
+                    data-tip="Add new to-do"
+                    on:click={() => handleNewSubItem(SubItemType.TODO) } 
+                    >
+                        <IoIosCheckboxOutline  />
+                    </span>
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <span class="hidden group-hover:inline-block tooltip" 
+                    data-tip="Add new text"
+                    on:click={() => handleNewSubItem(SubItemType.TEXT)} >
+                        <IconText class="fill-[#CCD2E3] h-[1.3rem] w-12 m-auto hover:fill-black" />
+                    </span>
+            </div>
         </div>
     </div>
     <div class="flex min-w-[500px] justify-center pt-4">

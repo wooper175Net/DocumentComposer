@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "DocumentSubItem" ADD COLUMN     "type" TEXT NOT NULL DEFAULT 'todo',
+ALTER COLUMN "checked" DROP NOT NULL,
+ALTER COLUMN "checked" DROP DEFAULT;

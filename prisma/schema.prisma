@@ -52,7 +52,8 @@ model Document {
 model DocumentSubItem {
   id                 Int      @id @default(autoincrement())
   label              String
-  checked            Boolean  @default(false)
+  checked            Boolean?
+  type               String   @default("todo")
   documentId         Int?
   documentTemplateId Int?
   createdAt          DateTime @default(now())
