@@ -98,15 +98,20 @@ $: {
   <div class="form-control flex flex-row items-center mt-3">
 
     <div class="form-control w-1/3 mr-6">
-      <input type="text" class="input input-sm input-bordered rounded-md" placeholder="Search" on:keyup={filterCases} bind:value={searchStr}  />
+      <input type="text" class="border border-[#818181] input input-sm input-bordered rounded-md" placeholder="Search" on:keyup={filterCases} bind:value={searchStr}  />
     </div>
     <div class="form-control w-1/6">
-      <select class="select select-sm select-bordered rounded-md w-full font-normal" bind:value={statusFilter} on:change={filterCases}>
+      <select class="border border-[#818181] select select-sm select-bordered rounded-md w-full font-normal" bind:value={statusFilter} on:change={filterCases}>
         <option value="">Filter by Status</option>
         <option value="new">New</option>
         <option value="pending">Pending</option>
         <option value="done">Done</option>
       </select>
+    </div>
+    <div class="form-control w-1/6 ml-4">
+      <button class="border border-[#818181] bg-white h-8 rounded-md w-full font-normal p-0 " on:click={() => addNewModal = true}>
+        <span class="text-lg pr-2 text-[#8F8F8F]">+</span>Create Case
+      </button>
     </div>
     <div class="form-control w-[14rem] flex flex-row items-center ml-auto">
       <label class="label cursor-pointer flex pr-2 text-lg text-[#7a7a7a] w-[13em]">Show only my cases</label>
@@ -139,12 +144,12 @@ $: {
     <div>No cases found.</div>
   {/each}
 </section>
-<section class="flex flex-col w-[90%] md:w-[70%] mx-auto pb-16 place-items-end">
+<!-- <section class=" border flex flex-col w-[90%] md:w-[70%] mx-auto pb-16 place-items-end">
   <button on:click={() => addNewModal = true}
   class="w-10 h-10 border border-2 border-[#CCD2E3] rounded-full text-[#CCD2E3] flex hover:border-black hover:text-black">
       <span class="inline-block text-center w-10 my-auto text-2xl">+</span>
   </button>
-</section>
+</section> -->
 
 {#if confirmationModal}
   <PopupWrapper on:close={() => confirmationModal = false} clickOutsideClose={true} >
