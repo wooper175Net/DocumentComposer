@@ -475,10 +475,10 @@ function checkSubItems(item: docItem, subItem: docItemSubItem) {
 
 <style lang="postcss">
 .chckbox-list li label {
-    @apply label cursor-pointer justify-start;
+    @apply label justify-start;
 }
 .chckbox-list label input {
-    @apply rounded-md w-6 h-6 drop-shadow-md;
+    @apply rounded-md w-6 h-6 drop-shadow-md cursor-pointer;
 }
 .chckbox-list label input:checked {
     @apply accent-[#59FF60];
