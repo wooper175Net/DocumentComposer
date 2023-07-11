@@ -1,6 +1,11 @@
 <script lang="ts">
     import {DocType} from "$lib/enums/DocType"
+    import IoMdCheckmark from 'svelte-icons/io/IoMdCheckmark.svelte'
+
     export let type: string;
+
+    export let done: boolean;
+
     let iconChar: string;
 
     switch(type) {
@@ -11,14 +16,22 @@
             iconChar = "?";
             break;
         default:
-            iconChar = "!"
+            iconChar = "!";
     }
 
 </script>
 <div class="head-icon ml-auto" 
-    class:red-icon={type === DocType.RESERVATION} 
-    class:green-icon={type === DocType.QUESTION}
-    class:blue-icon={type === DocType.INFO}
+    class:red-icon={!done && type === DocType.RESERVATION} 
+    class:green-icon={!done && type === DocType.QUESTION}
+    class:blue-icon={!done && type === DocType.INFO}
+    class:gray-icon={done}
     >
-    <span>{iconChar}</span>
+    <span>
+        {#if done}
+            <IoMdCheckmark />
+        {:else}
+            {iconChar}
+        {/if}
+        
+    </span>
 </div>

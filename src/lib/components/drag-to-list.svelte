@@ -316,7 +316,7 @@ function checkSubItems(item: docItem, subItem: docItemSubItem) {
                         <span class="inline-block h-4 text-[#CCD2E3] pl-2"><FaPen /></span>
                     {/if}
                 </span>    
-                <DocTypeIcon type={item.type} />
+                <DocTypeIcon type={item.type} done={item.done} />
             </div>
             <div class:cursor-pointer={adminMode && !item.done}
                 on:mouseenter={() => showEditDesc = item.id}  
@@ -454,6 +454,8 @@ function checkSubItems(item: docItem, subItem: docItemSubItem) {
 }
 
 .done {
-    @apply bg-[#cecece] text-[#787878];
+    @apply text-[#787878];
+    background: rgba(236, 236, 236, 0.62);
+
 }
 </style>
