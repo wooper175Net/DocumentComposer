@@ -30,6 +30,8 @@
 	"type": "module",
 	"dependencies": {
 		"@prisma/client": "^4.14.1",
+		"@svelteuidev/composables": "^0.14.0",
+		"@svelteuidev/core": "^0.14.0",
 		"bcrypt": "^5.1.0",
 		"daisyui": "^2.51.5",
 		"svelte-icons": "^2.1.0"
