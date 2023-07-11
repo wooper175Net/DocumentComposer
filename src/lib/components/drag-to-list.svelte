@@ -19,6 +19,7 @@ import { createEventDispatcher } from 'svelte';
 import { api } from "$lib/api";
 import { SubItemType } from "$lib/enums/SubItemType";
 import {CaseStatus} from "$lib/enums/CaseStatus";
+import { clickoutside } from '@svelteuidev/composables';
 
 const dispatch = createEventDispatcher();
 
@@ -59,6 +60,10 @@ let showEditHead:number|null;
 let showEditDesc:number|null;
 let editItemHead:number|null;
 let editItemDesc:number|null;
+
+let clickOutsideEnabled: boolean = false;
+let toUndoHead: string|null = '';
+let toUndoDesc: string|null = '';
 
 function handleSort(e) {
     items = e.detail.items;
@@ -223,20 +228,37 @@ $: items.sort((a,b) => {
         return -1;
 });
 
+async function handleKey(e, item: docItem) {
+    if (!adminMode)
+        return;
 
-function handleEscape(e) {
     if (e.key === 'Escape') {
         editItemDesc = null;
         editItemHead = null;
-    }
-}
+        if (toUndoHead) {
+            item.heading = toUndoHead;
+        }
 
-async function handleEnterKey(e, item: docItem) {
-    if (!adminMode)
+        if (toUndoDesc) {
+            item.desc = toUndoDesc;
+        }
+
+        toUndoDesc = null;
+        toUndoDesc = null;
         return;
+    }
+
     if (e.key !== 'Enter' || (!editItemDesc && !editItemHead)) {
         return;
     }
+
+    updateItem(item);
+}
+
+async function updateItem(item: docItem) {
+    if (!adminMode)
+        return;
+
     try {
         await api.updateDoc(item);
     } catch(e) {
@@ -245,7 +267,9 @@ async function handleEnterKey(e, item: docItem) {
 
     editItemDesc = null;
     editItemHead = null;
-}
+    clickOutsideEnabled = false;
+    toUndoHead = '';
+} 
 
 function inlineEditHeadClick(item: docItem) {
     if (!adminMode)
@@ -253,7 +277,9 @@ function inlineEditHeadClick(item: docItem) {
     if(editItemHead || item.done) {
         return;
     }
+    toUndoHead = item.heading;
     editItemHead = item.id;
+    clickOutsideEnabled = true;
 }
 
 function inlineEditDescClick(item: docItem) {
@@ -262,7 +288,9 @@ function inlineEditDescClick(item: docItem) {
     if(editItemDesc || item.done) {
         return;
     }
+    toUndoDesc = item.desc;
     editItemDesc = item.id;
+    clickOutsideEnabled = true;
 }
 
 function closeConfirmDone() {
@@ -288,11 +316,6 @@ function checkSubItems(item: docItem, subItem: docItemSubItem) {
 
 </script>
 
-
-<svelte:window on:keydown={handleEscape} />
-
-
-
 <section use:dndzone={{
     items, flipDurationMs, type, dropTargetStyle, dropTargetClasses, morphDisabled, dragDisabled
 }} on:consider={handleSort} on:finalize={handleFinalize}>
@@ -300,37 +323,48 @@ function checkSubItems(item: docItem, subItem: docItemSubItem) {
 {#each items as item(item.id)}
     <div class="card w-full bg-base-100 shadow-lg mb-4 rounded-lg" class:done={item.done} animate:flip={{duration:flipDurationMs}}>
         <div class="card-body p-4 pl-6">
-            <div class="card-title font-medium text-xl flex items-baseline">
-                <span class="w-full" class:cursor-pointer={adminMode && !item.done}
+            <div class="card-title font-medium text-xl flex items-baseline w-full">
+                <span class="w-full"
                     on:mouseenter={() => showEditHead = item.id}
                     on:mouseleave={() => showEditHead = null}
-                    on:click={() => inlineEditHeadClick(item)}
-                    on:keyup={(e) => handleEnterKey(e, item)}
+                    on:keyup={(e) => handleKey(e, item)}
                 >
                     {#if adminMode && editItemHead === item.id}
-                        <input type="text" bind:value="{item.heading}" class="input input-md input-bordered w-[90%] rounded-md" />
+                        <input type="text" bind:value="{item.heading}" class="input input-md input-bordered w-[90%] rounded-md"
+                        use:clickoutside={{ enabled: clickOutsideEnabled, callback: () => updateItem(item) }}
+                        />
                     {:else}
                         <span>{item.heading}</span>
                     {/if}
                     {#if adminMode && showEditHead === item.id && editItemHead !== item.id}
-                        <span class="inline-block h-4 text-[#CCD2E3] pl-2"><FaPen /></span>
+                        <span class="inline-block text-[#CCD2E3] h-5 w-5 " 
+                        class:cursor-pointer={adminMode && !item.done}
+                        on:click|stopPropagation={() => inlineEditHeadClick(item)}
+                        
+                        ><FaPen /></span>
                     {/if}
                 </span>    
                 <DocTypeIcon type={item.type} done={item.done} />
             </div>
-            <div class:cursor-pointer={adminMode && !item.done}
+            <div 
                 on:mouseenter={() => showEditDesc = item.id}  
                 on:mouseleave={() => showEditDesc = null}
-                on:click={() => inlineEditDescClick(item)}
-                on:keyup={(e) => handleEnterKey(e, item)}
+                on:keyup={(e) => handleKey(e, item)}
             >
             {#if adminMode && editItemDesc === item.id}
-                <textarea bind:value={item.desc} class="textarea textarea-bordered w-full h-[5rem] rounded-md"></textarea>
+                <textarea bind:value={item.desc} class="textarea textarea-bordered w-full h-[5rem] rounded-md"
+                use:clickoutside={{ enabled: clickOutsideEnabled, callback: () => updateItem(item) }}
+                ></textarea>
             {:else}
                 <p class="text-[#787878] text-lg">
                     {item.desc ?? ''}
                 {#if adminMode && showEditDesc === item.id && editItemDesc !== item.id}
-                <span class="inline-block h-4 text-[#CCD2E3] pl-2"><FaPen /></span>
+                <span 
+                    class:cursor-pointer={adminMode && !item.done}
+                    on:click|stopPropagation={() => inlineEditDescClick(item)}
+                    class="inline-block h-5 text-[#CCD2E3] pl-2">
+                    <FaPen />
+                </span>
                 {/if}
                 </p>
             {/if}
