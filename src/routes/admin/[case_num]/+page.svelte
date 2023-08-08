@@ -66,10 +66,10 @@ async function togglePublished() {
 </script>
 
 <button 
-  class="border-2 border-[#A9ACB4]  absolute ml-[77%] top-4 h-9 w-16 rounded-3xl text-[#A9ACB4] tooltip tooltip-bottom" 
-  data-tip="Return to overview" data-tooltip-placement="bottom"
+  class="border-2 hover:border-black hover:text-black border-[#A9ACB4]  absolute ml-[77%] top-4 h-9 w-16 rounded-3xl text-[#A9ACB4] tooltip tooltip-bottom" 
+  data-tip="Tilbage til oversigten" data-tooltip-placement="bottom"
   on:click={() => goto('/admin')}>
-  <IoMdArrowBack />
+  <IoMdArrowBack/>
 </button>
 
 <section class="grid grid-cols-12 w-full h-full">
@@ -78,9 +78,9 @@ async function togglePublished() {
       <div class="card-body p-8 pl-6">
           <div class="flex flex-row text-black">
             <div class="w-1/2">
-              <p class="pb-2">Case Number: {caseItem?.caseNumber}</p>
-              <p class="pb-2">Address: {caseItem?.address}</p>
-              <p>Last Update: {caseItem?.lastUpdate ? caseItem.lastUpdate.toLocaleDateString('da-DK', {dateStyle: "medium"}) : ''}</p>
+              <p class="pb-2">Sagsnummer: {caseItem?.caseNumber}</p>
+              <p class="pb-2">Adresse: {caseItem?.address}</p>
+              <p>Sidst opdateret: {caseItem?.lastUpdate ? caseItem.lastUpdate.toLocaleDateString('da-DK', {dateStyle: "medium"}) : ''}</p>
             </div>
             <div class="w-1/2">
               <p>Public URL: <a href="{$page.url.origin}/{caseItem?.caseNumber}">{$page.url.origin}/{caseItem?.caseNumber}</a></p>
@@ -112,7 +112,7 @@ async function togglePublished() {
 
   <section class="min-h-screen col-span-3 bg-[#f1f1f1] border border-l-slate-400 py-14 px-6 pt-20">
     <input on:keyup={filterItems} bind:value={searchStr} 
-      type="text" placeholder="Search Templates" class="input input-bordered input-lg h-[3rem] p-4 w-full"  />
+      type="text" placeholder="Søg skabeloner" class="input input-bordered input-lg h-[3rem] p-4 w-full"  />
     <DragFromList items={commonDocItems} on:finalize-templates={handleFinalizeTemplates} />
   </section>
 </section>

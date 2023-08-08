@@ -22,9 +22,9 @@ let docItems: Array<docItem> = caseItem.documents ?? [];
     <div class="card-body p-8 pl-6">
         <div class="flex flex-row text-black">
           <div class="w-1/2">
-            <p class="pb-2">Case Number: {caseItem.caseNumber}</p>
-            <p class="pb-2">Address: {caseItem.address}</p>
-            <p>Last Update: 27/04/2023</p> 
+            <p class="pb-2">Sagsnummer: {caseItem.caseNumber}</p>
+            <p class="pb-2">Adresse: {caseItem.address}</p>
+            <p>Sidst opdateret: {caseItem?.lastUpdate ? caseItem.lastUpdate.toLocaleDateString('da-DK', {dateStyle: "medium"}) : ''}</p> 
           </div>
         </div>
     </div>

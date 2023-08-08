@@ -40,24 +40,24 @@ function handleKeyDown(e:any) {
   <div class="card w-full min-h-[100px] h-[24rem] bg-base-100 shadow-lg rounded-lg mt-0 md:mt-20" >
     <div class="card-body">
       <div class="card-title font-bold text-xl flex items-baseline">
-        <span>Login</span>
+        <span>Log ind</span>
       </div>
       <div>
       <form action="?/login" method="post" bind:this={loginForm}>
       <div class="form-control w-full">
           <label class="label px-0">
-            <span class:text-red-600={formErrors.username || form?.credentials}>Username</span>
+            <span class:text-red-600={formErrors.username || form?.credentials}>Brugernavn</span>
           </label>
           <input type="text" bind:value={username} name="username" class="field" class:has-error={formErrors.username || form?.credentials} required />
       </div>
       <div class="form-control w-full">
         <label class="label px-0">
-          <span class:text-red-600={formErrors.passowrd || form?.credentials}>Password</span>
+          <span class:text-red-600={formErrors.passowrd || form?.credentials}>Adgangskode</span>
         </label>
         <input type="password" bind:value={passowrd} class:has-error={formErrors.passowrd || form?.credentials} name="password" class="field" required />
       </div>
       <div class="flex justify-center mt-16">
-        <button class="btn btn-sm btn-outline w-40 normal-case" on:click|preventDefault={login}>Login</button>
+        <button class="btn btn-sm btn-outline w-40 normal-case" on:click|preventDefault={login}>Log ind</button>
       </div>
       </form>
     </div>

@@ -2,7 +2,7 @@
 import FaRegTrashAlt from 'svelte-icons/fa/FaRegTrashAlt.svelte';
 import { flip } from 'svelte/animate';
 import { fly } from "svelte/transition";
-import type {caseItem, createdUpdatedFields } from "$lib/interfaces/caseItem";
+import type {caseItem } from "$lib/interfaces/caseItem";
 import PopupWrapper from '$lib/components/shared/PopupWrapper.svelte';
 import { onMount } from 'svelte';
 import type { PageData } from './$types';
@@ -98,23 +98,23 @@ $: {
   <div class="form-control flex flex-row items-center mt-3">
 
     <div class="form-control w-1/3 mr-6">
-      <input type="text" class="border border-[#818181] input input-sm input-bordered rounded-md" placeholder="Search" on:keyup={filterCases} bind:value={searchStr}  />
+      <input type="text" class="border border-[#818181] input input-sm input-bordered rounded-md" placeholder="Søg" on:keyup={filterCases} bind:value={searchStr}  />
     </div>
-    <div class="form-control w-1/6">
-      <select class="border border-[#818181] select select-sm select-bordered rounded-md w-full font-normal" bind:value={statusFilter} on:change={filterCases}>
-        <option value="">Filter by Status</option>
-        <option value="new">New</option>
+    <div class="form-control w-[10rem]">
+      <select class="border border-[#818181] select select-sm select-bordered rounded-md w-full font-normal hover:bg-black hover:text-white" bind:value={statusFilter} on:change={filterCases}>
+        <option value="" class="bg-white">Filtrer efter status</option>
+        <option value="new" class="bg-white text-black">New</option>
         <option value="pending">Pending</option>
         <option value="done">Done</option>
       </select>
     </div>
     <div class="form-control w-1/6 ml-4">
-      <button class="border border-[#818181] bg-white h-8 rounded-md w-full font-normal p-0 " on:click={() => addNewModal = true}>
-        <span class="text-lg pr-2 text-[#8F8F8F]">+</span>Create Case
+      <button class="border border-[#818181] bg-white h-8 rounded-md w-full font-normal p-0 hover:bg-black hover:text-white" on:click={() => addNewModal = true}>
+        <span class="text-lg pr-2 text-[#8F8F8F]">+</span>Opret sag
       </button>
     </div>
     <div class="form-control w-[14rem] flex flex-row items-center ml-auto">
-      <label class="label cursor-pointer flex pr-2 text-lg text-[#7a7a7a] w-[13em]">Show only my cases</label>
+      <label class="label cursor-pointer flex pr-2 text-lg text-[#7a7a7a] w-[13em]">Vis kun mine sager</label>
       <input type="checkbox" class="toggle"  bind:checked={showOnlyMine} on:change={filterCases} />
     </div>
 
@@ -153,10 +153,10 @@ $: {
 
 {#if confirmationModal}
   <PopupWrapper on:close={() => confirmationModal = false} clickOutsideClose={true} >
-    <h3 class=" font-normal text-lg text-center">Confirm deletion?</h3>
+    <h3 class=" font-normal text-lg text-center">Bekræft sletning?</h3>
     <div class="flex w-full justify-center pt-4">
-        <button class="btn btn-sm btn-outline w-20 ml-2" on:click={handleDeleteCase}>Yes</button>
-        <button class="btn btn-sm w-20 ml-2" on:click={() => confirmationModal = false}>Cancel</button>
+        <button class="btn btn-sm btn-outline w-20 ml-2" on:click={handleDeleteCase}>Ja</button>
+        <button class="btn btn-sm w-20 ml-2" on:click={() => confirmationModal = false}>Afbestille</button>
     </div>
   </PopupWrapper>
 {/if}
@@ -176,7 +176,7 @@ $: {
     </div>
     <div class="form-control w-full">
       <label class="label px-0">
-        <span>Address</span>
+        <span>Adresse</span>
       </label>
       <input type="text" class="field"
         class:has-error={newCaseErrors.hasErrors && newCaseErrors.newCaseAddress}
@@ -196,5 +196,9 @@ $: {
 <style lang="postcss">
   #draggable-items-list li {
     @apply w-full border border-red-400 bg-white rounded-md;
+  }
+
+  select option {
+    @apply bg-white text-black
   }
 </style>
