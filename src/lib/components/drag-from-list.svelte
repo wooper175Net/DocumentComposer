@@ -295,14 +295,14 @@ async function handleDeleteItem() {
             {#each newSubItems as subItem, index}
                 <div class="flex items-center mb-4">
                     {#if subItem.type === SubItemType.TODO}
-                    <span class="w-8 h-8 text-[#CCD2E3]">
+                    <span class="w-8 h-8 text-[#CCD2E3] flex-none">
                         <IoIosCheckboxOutline  />
                     </span>
                     {:else}
-                        <IconText class="fill-[#CCD2E3] h-6 w-8" />
+                        <IconText class="fill-[#CCD2E3] h-6 w-8 flex-none" />
                     {/if}
-                    <input type="text" bind:value={subItem.label} class="field w-[90%]" />
-                    <button class="w-6 ml-auto" on:click={() => handleRemoveSubItem(index)}>
+                    <input type="text" bind:value={subItem.label} class="field grow mx-2" />
+                    <button class="w-6 ml-auto flex-none" on:click={() => handleRemoveSubItem(index)}>
                         <IconCirleDel class="h-6 w-6 stroke-[#CCD2E3] hover:stroke-black " />
                     </button>
                 </div>
