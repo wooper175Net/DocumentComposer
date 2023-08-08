@@ -39,7 +39,7 @@ function handleLogout() {
         <MenuOption on:click={handleLogout}>
             <div class="text-[#CCD2E3] hover:text-black h-10 w-[120px] items-center flex flex-row pl-4">
                 <span class="inline-block h-6 pl-2 mr-2"><IoIosLogOut /></span>
-                <span class="text-black">Logout</span>
+                <span class="text-black">Log ud</span>
             </div>
         </MenuOption>
     </Menu>

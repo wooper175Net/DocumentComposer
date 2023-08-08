@@ -58,6 +58,8 @@ function handleOnConsider(e) {
         e.detail.items.splice(idx, 0, {...items[idx], id: newId});
         items = e.detail.items;
         shouldIgnoreDndEvents = true;   
+
+        // console.log(items)
     }
     else if (!shouldIgnoreDndEvents) {
         items = e.detail.items;
@@ -76,11 +78,13 @@ function handleFinalize(e) {
         shouldIgnoreDndEvents = false;
     }
     const [index, realId] = restoreId
-    if (index && realId) {
-        items[index].id = realId;
-    }
 
     dispatch('finalize-templates', items); 
+
+    if (index && realId) {
+        items[index].id = realId;
+
+    }
 }
 
 function validateNewTemplate() {
@@ -251,7 +255,7 @@ async function handleDeleteItem() {
 </ul>
 
 <div class="flex mt-8">
-    <button on:click={handleNewItem} data-tip="Add new Template"
+    <button on:click={handleNewItem} data-tip="Tilføj ny skabelon"
     class="w-10 h-10 border border-2 border-[#CCD2E3] mx-auto rounded-full text-[#CCD2E3] flex hover:border-black hover:text-black tooltip">
         <span class="inline-block text-center w-10 my-auto text-2xl">+</span>
     </button>
@@ -260,17 +264,17 @@ async function handleDeleteItem() {
 {#if addNewItem || editItem}
 <PopupWrapper on:close={handlePopupClose} clickOutsideClose={true} >
     <input type="hidden" bind:value={toEditId} />
-    <h3 class="font-bold text-xl pb-4">Create new element</h3>
+    <h3 class="font-bold text-xl pb-4">{(toEditId) ? "Rediger element" : "Opret nyt element"}</h3>
     <div>
         <div class="form-control w-full pr-10">
             <label class="label">
-              <span class:text-red-600={formErrors.newHeadingError}>Heading</span>
+              <span class:text-red-600={formErrors.newHeadingError}>Overskrift</span>
             </label>
             <input type="text" class="field" class:has-error={formErrors.newHeadingError} bind:value={newHeading} />
         </div>
         <div class="form-control w-full pr-10">
             <label class="label">
-              <span class:text-red-600={formErrors.newDescError}>Description</span>
+              <span class:text-red-600={formErrors.newDescError}>Beskrivelse</span>
             </label>
             <textarea class="field p-2" class:has-error={formErrors.newDescError} bind:value={newDesc} style="height:6rem"></textarea>
         </div>
@@ -279,14 +283,14 @@ async function handleDeleteItem() {
               <span>Type</span>
             </label>
             <select bind:value={newType} class="select select-sm select-bordered w-full max-w-xs rounded-md h-10 text-lg font-light">
-                <option value="{DocType.RESERVATION}">Reservation</option>
-                <option value="{DocType.QUESTION}">Question</option>
+                <option value="{DocType.RESERVATION}">Forbehold</option>
+                <option value="{DocType.QUESTION}">Spørgsmål</option>
                 <option value="{DocType.INFO}">Information</option>
             </select>
         </div>
         <div class="form-control w-full">
             <label class="label">
-              <span>Items</span>
+              <span>Genstande</span>
             </label>
             {#each newSubItems as subItem, index}
                 <div class="flex items-center mb-4">
@@ -312,14 +316,14 @@ async function handleDeleteItem() {
 
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                     <span class="hidden group-hover:inline-block w-12 h-8 hover:text-black tooltip"
-                    data-tip="Add new to-do"
+                    data-tip="Tilføj ny opgave"
                     on:click={() => handleNewSubItem(SubItemType.TODO) } 
                     >
                         <IoIosCheckboxOutline  />
                     </span>
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                     <span class="hidden group-hover:inline-block tooltip" 
-                    data-tip="Add new text"
+                    data-tip="Tilføj ny tekst"
                     on:click={() => handleNewSubItem(SubItemType.TEXT)} >
                         <IconText class="fill-[#CCD2E3] h-[1.3rem] w-12 m-auto hover:fill-black" />
                     </span>
@@ -327,8 +331,8 @@ async function handleDeleteItem() {
         </div>
     </div>
     <div class="flex min-w-[500px] justify-center pt-4">
-        <button class="btn btn-sm btn-outline w-40 ml-2 normal-case" on:click={saveNewTemplate}>Save</button>
-        <button class="btn btn-sm w-40 ml-2 normal-case" on:click={handlePopupClose}>Cancel</button>
+        <button class="btn btn-sm btn-outline w-40 ml-2 normal-case" on:click={saveNewTemplate}>Gem</button>
+        <button class="btn btn-sm w-40 ml-2 normal-case" on:click={handlePopupClose}>Afbestille</button>
     </div>
     
 </PopupWrapper>
@@ -336,10 +340,10 @@ async function handleDeleteItem() {
 
 {#if confirmDelModal}
     <PopupWrapper on:close={() => confirmDelModal = false} clickOutsideClose={true} >
-        <h3 class=" font-normal text-lg text-center">Confirm deletion?</h3>
+        <h3 class=" font-normal text-lg text-center">Bekræft sletning?</h3>
         <div class="flex w-full justify-center pt-4">
-            <button class="btn btn-sm btn-outline w-20 ml-2" on:click={handleDeleteItem} >Yes</button>
-            <button class="btn btn-sm w-20 ml-2" on:click={() => confirmDelModal = false}>Cancel</button>
+            <button class="btn btn-sm btn-outline w-20 ml-2" on:click={handleDeleteItem} >Ja</button>
+            <button class="btn btn-sm w-20 ml-2" on:click={() => confirmDelModal = false}>Afbestille</button>
         </div>
     </PopupWrapper>
 {/if}

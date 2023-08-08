@@ -378,8 +378,11 @@ function checkSubItems(item: docItem, subItem: docItemSubItem) {
             <ul class="chckbox-list my-6">
                 {#each item.documentSubItems as sub_item(sub_item.id)}
                 <li class="flex items-center"><label class="w-[90%]">
-                    {#if sub_item.type === SubItemType.TODO}
+                    {#if adminMode && sub_item.type === SubItemType.TODO}
                      <input type="checkbox" bind:checked={sub_item.checked} disabled={item.done} on:change={() => checkSubItems(item, sub_item)} />
+                    {/if}
+                    {#if !adminMode && sub_item.type === SubItemType.TODO}
+                    <input type="checkbox" bind:checked={sub_item.checked} disabled={item.done} on:click|preventDefault={() => {return false}} />
                     {/if}
                     <span>{sub_item.label}</span>
                     </label>
@@ -401,31 +404,31 @@ function checkSubItems(item: docItem, subItem: docItemSubItem) {
 
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                     <span class="hidden group-hover:inline-block w-12 h-8 hover:text-black tooltip"
-                    data-tip="Add new to-do"
+                    data-tip="Tilføj ny opgave"
                     on:click={()=> addTodoSubItem(item) } 
                     >
                         <IoIosCheckboxOutline  />
                     </span>
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                     <span class="hidden group-hover:inline-block tooltip" 
-                    data-tip="Add new text"
+                    data-tip="Tilføj ny tekst"
                     on:click={() => addTextSubItem(item)} >
                         <IconText class="fill-[#CCD2E3] h-[1.3rem] w-12 m-auto hover:fill-black" />
                     </span>
                 </div>
             </div>
             <div class="flex justify-end h-6 gap-2">
-                <button on:click={() => confirmDocItemToDel(item) } class="tooltip" data-tip="Delete item">
+                <button on:click={() => confirmDocItemToDel(item) } class="tooltip" data-tip="Slet element">
                     <IconFolderDel class="stroke-[#cecece] w-6 h-6 hover:stroke-black " />
                 </button>
-                <button on:click={() => confirmItemDoneToggle(item)} class="tooltip" data-tip="Mark item as DONE">
+                <button on:click={() => confirmItemDoneToggle(item)} class="tooltip" data-tip="Marker varen som UDFØRT">
                     <IconCircleDblCheck class="stroke-[#cecece] w-6 h-6 hover:stroke-black " />
                 </button>
             </div>
             {/if}
-            {#if item.done}
+            {#if adminMode && item.done}
             <div class="flex justify-end h-6 gap-2">
-                <button on:click={() => confirmItemDoneToggle(item)} class="tooltip" data-tip="Mark item as UNDONE">
+                <button on:click={() => confirmItemDoneToggle(item)} class="tooltip" data-tip="Marker element som FORTRYDET">
                     <IconCircleDblCheckStrout class="stroke-red-800 w-6 h-6 hover:stroke-black " />
                 </button>
             </div>
@@ -440,22 +443,22 @@ function checkSubItems(item: docItem, subItem: docItemSubItem) {
 {#if subItemModal}
     <PopupWrapper on:close={() => subItemModal = false} clickOutsideClose={false} >
         <h3 class=" font-normal text-lg">
-            {#if subItemType === SubItemType.TEXT} Add Text Sub Item {:else} Add To-do Sub Item {/if}
+            {#if subItemType === SubItemType.TEXT} Tilføj tekstunderelement {:else} Tilføj opgaveunderelement {/if}
         </h3>
         <div class="flex py-2 w-[500px]">
             <input type="text" class="input input-sm input-bordered w-2/3 rounded-sm" class:border-red-600={newSubItemError} bind:value={newSubItemTitle} />
-            <button class="btn btn-sm btn-outline w-1/6 ml-2 normal-case" on:click={saveDocSubItem}>Add</button>
-            <button class="btn btn-sm w-1/6 ml-2 normal-case" on:click={() => subItemModal = false}>Cancel</button>
+            <button class="btn btn-sm btn-outline w-1/6 ml-2 normal-case" on:click={saveDocSubItem}>OK</button>
+            <button class="btn btn-sm w-1/6 ml-2 normal-case" on:click={() => subItemModal = false}>Afbestille</button>
         </div>
     </PopupWrapper>
 {/if}
 
 {#if confirmDelModal}
     <PopupWrapper on:close={() => confirmDelModal = false} clickOutsideClose={true} >
-        <h3 class=" font-normal text-lg text-center">Confirm deletion?</h3>
+        <h3 class=" font-normal text-lg text-center">Bekræft sletning?</h3>
         <div class="flex w-full justify-center pt-4">
-            <button class="btn btn-sm btn-outline w-20 ml-2" on:click={whatToDelete} >Yes</button>
-            <button class="btn btn-sm w-20 ml-2" on:click={() => confirmDelModal = false}>Cancel</button>
+            <button class="btn btn-sm btn-outline w-20 ml-2" on:click={whatToDelete} >Ja</button>
+            <button class="btn btn-sm w-20 ml-2" on:click={() => confirmDelModal = false}>Afbestille</button>
         </div>
     </PopupWrapper>
 {/if}
@@ -463,11 +466,11 @@ function checkSubItems(item: docItem, subItem: docItemSubItem) {
 {#if confirmDoneModal || confirmUndoneModal}
     <PopupWrapper on:close={closeConfirmDone} clickOutsideClose={true} >
         <h3 class=" font-normal text-lg text-center">
-            {confirmDoneModal ? 'Mark item as done?' : 'Mark item (and all sub-items) as undone?'}
+            {confirmDoneModal ? 'Marker hele opgaven som udført?' : 'Markér opgave (og alle underpunkter) som fortrydet?'}
         </h3>
         <div class="flex w-full justify-center pt-4">
-            <button class="btn btn-sm btn-outline w-20 ml-2" on:click={checkItemDone} >Yes</button>
-            <button class="btn btn-sm w-20 ml-2" on:click={closeConfirmDone}>Cancel</button>
+            <button class="btn btn-sm btn-outline w-20 ml-2" on:click={checkItemDone} >Ja</button>
+            <button class="btn btn-sm w-20 ml-2" on:mouseup={closeConfirmDone}>Afbestille</button>
         </div>
     </PopupWrapper>
 {/if}
