@@ -80,7 +80,7 @@ async function togglePublished() {
             <div class="w-1/2">
               <p class="pb-2">Sagsnummer: {caseItem?.caseNumber}</p>
               <p class="pb-2">Adresse: {caseItem?.address}</p>
-              <p>Sidst opdateret: {caseItem?.lastUpdate ? caseItem.lastUpdate.toLocaleDateString('da-DK', {dateStyle: "medium"}) : ''}</p>
+              <p>Sidst opdateret: {caseItem?.lastUpdate ? caseItem.lastUpdate.toLocaleString('da-DK', {dateStyle: "medium", timeStyle: "short"}) : ''}</p>
             </div>
             <div class="w-1/2">
               <p>Public URL: <a href="{$page.url.origin}/{caseItem?.caseNumber}">{$page.url.origin}/{caseItem?.caseNumber}</a></p>
